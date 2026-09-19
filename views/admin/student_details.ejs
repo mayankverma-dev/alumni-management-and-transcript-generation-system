@@ -2,271 +2,257 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Student Detail | <%= studentDetails.student_name %></title>
+    <title>Student Profile | Admin</title>
     <link rel="stylesheet" href="/public/css/tailwind.css" />
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="/public/css-fontawesome/all.min.css" />
     <script src="/public/js/loadHeaderFooter.js"></script>
-    <style>
-      ::-webkit-scrollbar {
-        width: 0;
-      }
-
-      .profile-details th,
-      .profile-details td {
-        border: 1px solid #ccc;
-        padding: 10px;
-        text-align: left;
-      }
-
-      .profile-details th {
-        background-color: #f4f4f4;
-        width: 20%;
-      }
-
-      .profile-details td {
-        width: 30%;
-      }
-
-      .admin-links a {
-        background-color: #f4f4f4;
-        padding: 10px 15px;
-        border-radius: 5px;
-        transition: background-color 0.2s, color 0.2s;
-        border: 1px solid #ddd;
-        font-weight: bold;
-      }
-
-      .admin-links a:hover {
-        background-color: #333;
-        color: #fff;
-      }
-
-      #delete-btn:hover {
-        background-color: #a20202;
-      }
-    </style>
   </head>
-  <body class="font-sans m-0 p-0 box-border">
-    <div id="header" class="min-h-36"></div>
+  <body class="bg-slate-50 font-sans min-h-screen flex flex-col">
+    <div id="header"></div>
 
-    <div class="fixed top-4 right-4">
-      <button
-        onclick="goToHistoryPage('/admin/students')"
-        class="flex items-center bg-indigo-700 text-white py-2 px-4 rounded font-bold hover:bg-indigo-800"
-      >
-        <i class="fa-solid fa-arrow-left mr-2"></i>Back
-      </button>
-    </div>
+    <main class="flex-grow container mx-auto px-4 py-8 max-w-6xl">
+      <div class="flex justify-between items-center mb-6">
+        <div class="flex items-center gap-3">
+          <a
+            href="/admin/students"
+            class="bg-white border border-slate-300 px-3 py-2 rounded-lg hover:bg-slate-100 transition"
+            ><i class="fa-solid fa-arrow-left"></i
+          ></a>
+          <h1 class="text-2xl font-bold text-slate-800">Student Profile</h1>
+        </div>
+        <div class="flex gap-2">
+          <a
+            href="/admin/students/edit/<%= studentDetails.rollno %>"
+            class="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-lg shadow font-bold text-sm transition"
+            ><i class="fa-solid fa-pen-to-square mr-2"></i> Edit</a
+          >
+          <button
+            id="deleteBtn"
+            data-rollno="<%= studentDetails.rollno %>"
+            class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg shadow font-bold text-sm transition"
+          >
+            <i class="fa-solid fa-trash-can mr-2"></i> Delete
+          </button>
+        </div>
+      </div>
 
-    <h1 class="m-5 font-bold text-gray-800 text-3xl text-center">
-      Student Details
-    </h1>
-
-    <section>
-      <section class="m-5">
-        <div class="p-2 text-2xl font-bold text-gray-800">Personal Details</div>
-        <table class="profile-details w-full border-collapse px-2 my-5">
-          <tr>
-            <th>Name</th>
-            <td><%= studentDetails.student_name %></td>
-            <th>Roll no.</th>
-            <td><%= studentDetails.rollno %></td>
-            <td rowspan="3" class="p-0 align-top" style="width: auto">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="space-y-6">
+          <div
+            class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 text-center"
+          >
+            <div class="relative w-32 h-32 mx-auto mb-4">
               <img
                 src="/public/uploads/profile_pics/<%= studentDetails.profile_pic %>"
-                alt="Profile Picture"
+                class="w-32 h-32 rounded-full object-cover border-4 border-slate-100 shadow-md"
               />
-            </td>
-          </tr>
-          <tr>
-            <th>Father's Name</th>
-            <td><%= studentDetails.father_name %></td>
-            <th>Date of Birth</th>
-            <td><%= studentDetails.dob %></td>
-          </tr>
-          <tr>
-            <th>Gender</th>
-            <td><%= studentDetails.gender %></td>
-            <th>Admission Category</th>
-            <td><%= studentDetails.category %></td>
-          </tr>
-          <tr>
-            <th>Year of Admission</th>
-            <td><%= studentDetails.year_of_admission %></td>
-            <th>Department</th>
-            <td colspan="2"><%= studentDetails.department %></td>
-          </tr>
-          <tr>
-            <th>Nationality</th>
-            <td><%= studentDetails.nationality %></td>
-            <th>Religion</th>
-            <td colspan="2"><%= studentDetails.religion %></td>
-          </tr>
-          <tr>
-            <th>Phone Number</th>
-            <td><%= studentDetails.phone_no %></td>
-            <th>Email</th>
-            <td colspan="2"><%= studentDetails.email %></td>
-          </tr>
-        </table>
+            </div>
+            <h2 class="text-xl font-bold text-slate-800 capitalize">
+              <%= studentDetails.student_name %>
+            </h2>
+            <p class="text-indigo-600 font-mono font-medium mt-1">
+              <%= studentDetails.rollno %>
+            </p>
+            <div class="mt-4 flex flex-wrap justify-center gap-2">
+              <span
+                class="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-xs font-bold"
+                ><%= studentDetails.department %></span
+              >
+              <span
+                class="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-xs font-bold"
+                ><%= studentDetails.year_of_admission %></span
+              >
+            </div>
+          </div>
 
-        <div class="p-2 text-2xl font-bold text-gray-800">Address Details</div>
-        <table class="profile-details w-full border-collapse px-2 my-5">
-          <tr>
-            <th>Permanent Address</th>
-            <td><%= studentDetails.permanent_address %></td>
-            <th>Domicile State</th>
-            <td><%= studentDetails.domicile_state %></td>
-          </tr>
-          <tr>
-            <th>District</th>
-            <td><%= studentDetails.district %></td>
-            <th>Pin Code</th>
-            <td><%= studentDetails.pin_code %></td>
-          </tr>
-          <tr>
-            <th>Correspondence Address</th>
-            <td colspan="3"><%= studentDetails.correspondence_address %></td>
-          </tr>
-        </table>
+          <div
+            class="bg-white rounded-xl shadow-sm border border-slate-200 p-6"
+          >
+            <h3 class="text-sm font-bold text-slate-400 uppercase mb-4">
+              Quick Actions
+            </h3>
+            <div class="space-y-3">
+              <a
+                href="/admin/student-job-details/<%= studentDetails.rollno %>"
+                class="w-full bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white py-2 px-4 rounded-lg transition font-medium flex justify-between items-center"
+              >
+                <span
+                  ><i class="fa-solid fa-briefcase mr-2"></i> View Jobs</span
+                >
+                <i class="fa-solid fa-chevron-right text-xs"></i>
+              </a>
+              <a
+                href="/admin/marks/<%= studentDetails.rollno %>"
+                class="w-full bg-blue-50 text-blue-700 hover:bg-blue-600 hover:text-white py-2 px-4 rounded-lg transition font-medium flex justify-between items-center"
+              >
+                <span
+                  ><i class="fa-solid fa-poll mr-2"></i> View Marksheet</span
+                >
+                <i class="fa-solid fa-chevron-right text-xs"></i>
+              </a>
+              <button
+                onclick="downloadTranscript('<%= studentDetails.rollno %>')"
+                class="w-full bg-indigo-50 text-indigo-700 hover:bg-indigo-600 hover:text-white py-2 px-4 rounded-lg transition font-medium flex justify-between items-center text-left"
+              >
+                <span
+                  ><i class="fa-solid fa-file-pdf mr-2"></i> Download
+                  Transcript</span
+                >
+                <i class="fa-solid fa-download text-xs"></i>
+              </button>
+            </div>
+          </div>
 
-        <hr
-          style="border: 1px dashed black; margin: 70px auto; margin-bottom: 0"
-        />
-        <hr
-          style="
-            border: 1px dashed black;
-
-            margin-bottom: 40px auto;
-          "
-        />
-
-        <div class="mx-4 my-7 flex flex-col justify-evenly text-gray-800">
-          <h2 class="p-2 text-2xl font-bold">Admin Actions</h2>
-          <div class="admin-links flex flex-wrap gap-4 items-center">
-            <a href="/admin/student-job-details/<%= studentDetails.rollno %>"
-              >View Job Details</a
-            >
-
-            <a href="/admin/marks/<%= studentDetails.rollno %>"
-              >View Student Marks</a
-            >
-
-            <a href="/admin/students/edit/<%= studentDetails.rollno %>"
-              >Edit Details</a
-            >
-            <button
-              id="deleteButton"
-              student-rollno="<%= studentDetails.rollno %>"
-              class="bg-red-900 hover:bg-red-700 hover:ring hover:ring-offset-1 hover:ring-red-600 text-white border font-bold py-2 px-4 rounded transition-all"
-            >
-              Delete Student
-            </button>
-            <button
-              id="downloadBtn"
-              onclick="downloadTranscript()"
-              class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
-            >
-              <span>Download Transcript</span>
-            </button>
+          <div
+            class="bg-white rounded-xl shadow-sm border border-slate-200 p-6"
+          >
+            <h3 class="text-sm font-bold text-slate-400 uppercase mb-4">
+              Add Marks
+            </h3>
+            <div class="grid grid-cols-4 gap-2">
+              <% for(let i=1; i<=8; i++) { %>
+              <a
+                href="/admin/add-marks/<%= studentDetails.rollno %>/<%= i %>"
+                class="bg-slate-100 hover:bg-slate-800 hover:text-white text-slate-600 py-2 rounded text-center text-xs font-bold transition"
+                >Sem <%= i %></a
+              >
+              <% } %>
+            </div>
           </div>
         </div>
-        <br />
-        <hr />
 
-        <div class="mx-4 my-7 flex flex-col justify-evenly text-gray-800">
-          <h2 class="p-2 text-2xl font-bold">Add Student Marks</h2>
-          <div class="admin-links flex flex-wrap gap-4 items-center">
-            <a href="/admin/add-marks/<%= studentDetails.rollno %>/1"
-              >Semester I</a
+        <div class="lg:col-span-2 space-y-6">
+          <div
+            class="bg-white rounded-xl shadow-sm border border-slate-200 p-6"
+          >
+            <h3
+              class="text-lg font-bold text-slate-800 border-b border-slate-100 pb-3 mb-4"
             >
-            <a href="/admin/add-marks/<%= studentDetails.rollno %>/2"
-              >Semester II</a
-            >
-            <a href="/admin/add-marks/<%= studentDetails.rollno %>/3"
-              >Semester III</a
-            >
-            <a href="/admin/add-marks/<%= studentDetails.rollno %>/4"
-              >Semester IV</a
-            >
-            <a href="/admin/add-marks/<%= studentDetails.rollno %>/5"
-              >Semester V</a
-            >
-            <a href="/admin/add-marks/<%= studentDetails.rollno %>/6"
-              >Semester VI</a
-            >
-            <a href="/admin/add-marks/<%= studentDetails.rollno %>/7"
-              >Semester VII</a
-            >
-            <a href="/admin/add-marks/<%= studentDetails.rollno %>/8"
-              >Semester VIII</a
-            >
+              Personal Information
+            </h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div>
+                <label class="text-xs text-slate-400 uppercase font-bold"
+                  >Father's Name</label
+                >
+                <p class="font-medium text-slate-700">
+                  <%= studentDetails.father_name %>
+                </p>
+              </div>
+              <div>
+                <label class="text-xs text-slate-400 uppercase font-bold"
+                  >Date of Birth</label
+                >
+                <p class="font-medium text-slate-700">
+                  <%= studentDetails.dob %>
+                </p>
+              </div>
+              <div>
+                <label class="text-xs text-slate-400 uppercase font-bold"
+                  >Gender</label
+                >
+                <p class="font-medium text-slate-700">
+                  <%= studentDetails.gender %>
+                </p>
+              </div>
+              <div>
+                <label class="text-xs text-slate-400 uppercase font-bold"
+                  >Category</label
+                >
+                <p class="font-medium text-slate-700">
+                  <%= studentDetails.category %>
+                </p>
+              </div>
+              <div>
+                <label class="text-xs text-slate-400 uppercase font-bold"
+                  >Nationality</label
+                >
+                <p class="font-medium text-slate-700">
+                  <%= studentDetails.nationality %>
+                </p>
+              </div>
+              <div>
+                <label class="text-xs text-slate-400 uppercase font-bold"
+                  >Religion</label
+                >
+                <p class="font-medium text-slate-700">
+                  <%= studentDetails.religion %>
+                </p>
+              </div>
+            </div>
           </div>
-          <br />
+
+          <div
+            class="bg-white rounded-xl shadow-sm border border-slate-200 p-6"
+          >
+            <h3
+              class="text-lg font-bold text-slate-800 border-b border-slate-100 pb-3 mb-4"
+            >
+              Contact Details
+            </h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div>
+                <label class="text-xs text-slate-400 uppercase font-bold"
+                  >Phone</label
+                >
+                <p class="font-medium text-slate-700">
+                  <%= studentDetails.phone_no %>
+                </p>
+              </div>
+              <div>
+                <label class="text-xs text-slate-400 uppercase font-bold"
+                  >Email</label
+                >
+                <p class="font-medium text-slate-700">
+                  <%= studentDetails.email %>
+                </p>
+              </div>
+              <div class="sm:col-span-2">
+                <label class="text-xs text-slate-400 uppercase font-bold"
+                  >Permanent Address</label
+                >
+                <p class="font-medium text-slate-700">
+                  <%= studentDetails.permanent_address %>
+                </p>
+              </div>
+              <div class="sm:col-span-2">
+                <label class="text-xs text-slate-400 uppercase font-bold"
+                  >Correspondence Address</label
+                >
+                <p class="font-medium text-slate-700">
+                  <%= studentDetails.correspondence_address %>
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
-      </section>
-    </section>
+      </div>
+    </main>
 
     <script>
-      // Delete Student
       document
-        .getElementById('deleteButton')
+        .getElementById('deleteBtn')
         .addEventListener('click', function () {
-          const rollno = this.getAttribute('student-rollno');
-
+          const rollno = this.getAttribute('data-rollno');
           if (
             confirm(
-              `Are you sure you want to delete student with Roll No: ${rollno}?`
+              'Are you sure you want to PERMANENTLY delete this student and all related records?'
             )
           ) {
-            fetch(`/admin/students/delete/${rollno}`, {
-              method: 'DELETE',
-            })
-              .then((response) => {
-                if (!response.ok) throw new Error('Failed to delete student');
-                return response.json();
-              })
+            fetch(`/admin/students/delete/${rollno}`, { method: 'DELETE' })
+              .then((res) => res.json())
               .then((data) => {
-                alert('Student deleted successfully!');
+                alert(data.message || 'Deleted successfully');
                 window.location.href = '/admin/students';
               })
-              .catch((error) => {
-                console.error('Error:', error);
-                alert('Failed to delete student.');
-              });
+              .catch((err) => alert('Error deleting student'));
           }
         });
 
-      // Go To History Page
-      function goToHistoryPage(targetUrl) {
-        let visitedPages =
-          JSON.parse(sessionStorage.getItem('visitedPages')) || [];
-
-        // Convert all stored URLs to relative paths for comparison
-        let normalizedHistory = visitedPages.map(
-          (url) => new URL(url, window.location.origin).pathname
-        );
-
-        // Convert targetUrl to absolute if needed
-        let normalizedTarget = new URL(targetUrl, window.location.origin)
-          .pathname;
-
-        if (normalizedHistory.includes(normalizedTarget)) {
-          window.location.href = normalizedTarget; // Navigate instantly if in history
-        } else {
-          window.location.href = targetUrl; // If not in history, still navigate
-        }
-      }
-
-      // Download Transcript
-      function downloadTranscript() {
-        const btn = document.getElementById('downloadBtn');
-        const rollno = '<%= studentDetails.rollno %>';
-        const url = `/student/transcript/${rollno}`;
-
-        btn.disabled = true;
-        window.location.href = url;
+      function downloadTranscript(rollno) {
+        window.location.href = `/student/transcript/${rollno}`;
       }
     </script>
   </body>

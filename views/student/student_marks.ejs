@@ -2,276 +2,124 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Student Marks</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
     <link rel="stylesheet" href="/public/css/tailwind.css" />
     <link rel="stylesheet" href="/public/css-fontawesome/all.min.css" />
     <script src="/public/js/loadHeaderFooter.js"></script>
-    <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-      .h2-div h2 {
-        font-size: 1.5rem;
-        text-align: center;
-        margin: 16px;
-        margin-top: 20px;
-      }
-      .student-details-div {
-        margin: 0 auto;
-        width: 85%;
-        font-size: 1.05rem;
-        word-spacing: 2px;
-        font-weight: 500;
-        padding: 15px;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-evenly;
-        height: 150px;
-        position: relative;
-        text-transform: uppercase;
-      }
-      .photo-div img {
-        padding: 4px;
-        border: 2px solid black;
-        position: absolute;
-        width: 100px;
-        top: 10px;
-        right: 26px;
-      }
-      .table-div {
-        margin: 16px;
-        overflow: auto;
-      }
-      table {
-        margin: 0 auto;
-        width: 85%;
-        max-width: 100%;
-        min-width: 85%;
-        border-collapse: collapse;
-        margin-bottom: 20px;
-      }
-      tr {
-        text-align: center;
-      }
-      table,
-      th,
-      td {
-        font-size: 1.02rem;
-        border: 2px solid black;
-      }
-      th,
-      td {
-        padding: 6px;
-      }
-      th {
-        background-color: #f2f2f2;
-      }
-
-      #print-div {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        margin-bottom: 20px;
-      }
-      .back-link {
-        display: block;
-        text-align: center;
-        margin-top: 20px;
-        color: #007bff;
-        text-decoration: none;
-        font-size: 16px;
-      }
-      .back-link:hover {
-        text-decoration: underline;
-      }
-
-      @media print {
-        .no-print {
-          display: none;
-        }
-      }
-    </style>
   </head>
-  <body class="font-sans">
-    <div id="header" class="min-h-36"></div>
+  <body class="bg-gray-50 font-sans min-h-screen flex flex-col">
+    <div id="header"></div>
 
-    <div class="fixed top-4 right-4">
-      <button
-        onclick="goToHistoryPage('/student/dashboard')"
-        class="flex items-center bg-indigo-700 text-white py-2 px-4 rounded font-bold hover:bg-indigo-800"
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+      <div class="flex justify-between items-center mb-6 no-print">
+        <h1 class="text-3xl font-bold text-gray-800">Academic Performance</h1>
+        <a
+          href="/student/dashboard"
+          class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded font-semibold transition"
+          ><i class="fa-solid fa-arrow-left"></i> Back</a
+        >
+      </div>
+
+      <div
+        class="bg-white rounded-lg shadow p-6 mb-8 flex justify-between items-center border-l-4 border-blue-600"
       >
-        <i class="fa-solid fa-arrow-left mr-2"></i>Back
-      </button>
-    </div>
-
-    <h1 class="text-center text-3xl font-semibold capitalize m-4 mb-6">
-      Student Marksheet
-    </h1>
-
-    <div class="student-details-div">
-      <p><b>Student Name:</b> <%= studentDetails.student_name %></p>
-      <p><b>Roll No.:</b> <%= studentDetails.rollno %></p>
-      <p><b>Father's Name:</b> <%= studentDetails.father_name %></p>
-      <p><b>Department:</b> <%= studentDetails.department %></p>
-      <div class="photo-div">
+        <div>
+          <h2 class="text-xl font-bold text-gray-800">
+            <%= studentDetails.student_name %>
+          </h2>
+          <p class="text-gray-600">
+            Roll No: <span class="font-mono"><%= studentDetails.rollno %></span>
+          </p>
+          <p class="text-gray-600">
+            Department: <%= studentDetails.department %>
+          </p>
+        </div>
         <img
           src="/public/uploads/profile_pics/<%= studentDetails.profile_pic %>"
-          alt=""
+          class="w-20 h-20 rounded-full object-cover border shadow-sm"
         />
       </div>
+
+      <% for (let semester in semesters) { %>
+      <div class="bg-white rounded-lg shadow mb-8 overflow-hidden">
+        <div
+          class="bg-gray-800 text-white px-6 py-3 flex justify-between items-center"
+        >
+          <h3 class="text-lg font-bold">Semester <%= semester %></h3>
+          <span class="text-sm bg-gray-700 px-2 py-1 rounded"
+            >Session: <%= semesters[semester].courses[0].session || 'N/A'
+            %></span
+          >
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm text-left text-gray-600">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-100">
+              <tr>
+                <th class="px-6 py-3">Code</th>
+                <th class="px-6 py-3">Subject</th>
+                <th class="px-6 py-3 text-center">Type</th>
+                <th class="px-6 py-3 text-center">Credits</th>
+                <th class="px-6 py-3 text-center">Max Marks</th>
+                <th class="px-6 py-3 text-center">Obtained</th>
+                <th class="px-6 py-3 text-center">Grade</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <% semesters[semester].courses.forEach(course => { %>
+              <tr class="hover:bg-gray-50">
+                <td class="px-6 py-4 font-medium"><%= course.course_code %></td>
+                <td class="px-6 py-4"><%= course.course_name %></td>
+                <td class="px-6 py-4 text-center"><%= course.course_type %></td>
+                <td class="px-6 py-4 text-center"><%= course.credits %></td>
+                <td class="px-6 py-4 text-center"><%= course.max_marks %></td>
+                <td class="px-6 py-4 text-center font-bold text-gray-800">
+                  <%= course.marks_obtained %>
+                </td>
+                <td class="px-6 py-4 text-center">
+                  <span
+                    class="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-0.5 rounded"
+                    ><%= course.grade %></span
+                  >
+                </td>
+              </tr>
+              <% }); %>
+            </tbody>
+            <tfoot class="bg-gray-50 font-semibold text-gray-900">
+              <tr>
+                <td colspan="3" class="px-6 py-3 text-right">
+                  Semester Total:
+                </td>
+                <td class="px-6 py-3 text-center">
+                  <%= semesters[semester].total_credits %>
+                </td>
+                <td class="px-6 py-3 text-center">
+                  <%= semesters[semester].total_max_marks %>
+                </td>
+                <td class="px-6 py-3 text-center">
+                  <%= semesters[semester].total_marks_obtained %>
+                </td>
+                <td class="px-6 py-3 text-center bg-green-50 text-green-700">
+                  SGPA: <%= semesters[semester].gpa %>
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+      <% } %>
+
+      <div class="text-center mt-8 no-print">
+        <button
+          onclick="window.location.href='/student/transcript/<%= studentDetails.rollno %>'"
+          class="bg-green-600 text-white px-6 py-3 rounded shadow hover:bg-green-700 transition font-bold"
+        >
+          <i class="fa-solid fa-file-pdf mr-2"></i> Download Official Transcript
+        </button>
+      </div>
     </div>
-
-    <% for (let semester in semesters) { %>
-    <div class="h2-div"></div>
-    <div class="table-div">
-      <table>
-        <thead>
-          <tr>
-            <th>CODE</th>
-            <th>SUBJECTS</th>
-            <th>TYPE</th>
-            <th>MIN MKS.</th>
-            <th>MAX MKS.</th>
-            <th>Credits</th>
-            <th>MARKS OBT.</th>
-            <th>INT. OBT.</th>
-            <th>Grade</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% semesters[semester].courses.forEach(course => { %>
-          <tr>
-            <td><%= course.course_code %></td>
-            <td><%= course.course_name %></td>
-            <td><%= course.course_type %></td>
-            <td><%= course.min_marks %></td>
-            <td><%= course.max_marks %></td>
-            <td><%= course.credits %></td>
-            <td><%= course.marks_obtained %></td>
-            <td><%= course.marks_internal %></td>
-            <td><%= course.grade %></td>
-          </tr>
-          <% }); %>
-
-          <tr>
-            <td colspan="3"></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td colspan="3"></td>
-          </tr>
-          <tr>
-            <th colspan="3">SEMESTER TOTAL:</th>
-            <td><%= semesters[semester].total_min_marks %></td>
-            <td><%= semesters[semester].total_max_marks %></td>
-            <td><%= semesters[semester].total_credits %></td>
-            <th>Total OBT.:</th>
-            <td><%= semesters[semester].total_marks_obtained %></td>
-            <th>SGPA: <%= semesters[semester].gpa %></th>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <hr style="border: 1px dashed black; width: 84vw; margin: 0 auto" />
-    <% } %>
-
-    <div id="print-div" class="mt-8">
-      <button
-        id="downloadBtn"
-        onclick="downloadTranscript()"
-        class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
-      >
-        <span>Download Transcript</span>
-      </button>
-    </div>
-
-    <script defer>
-      function convertToRoman(num) {
-        const romanNumeralMap = [
-          { value: 10, numeral: 'X' },
-          { value: 9, numeral: 'IX' },
-          { value: 5, numeral: 'V' },
-          { value: 4, numeral: 'IV' },
-          { value: 1, numeral: 'I' },
-        ];
-
-        let roman = '';
-
-        for (const { value, numeral } of romanNumeralMap) {
-          while (num >= value) {
-            roman += numeral;
-            num -= value;
-          }
-        }
-
-        return roman;
-      }
-      const semesters = '<%= semesters %>';
-      const semesterNumber = '<%= sem %>';
-      let sem = semesterNumber.split(',').map(Number);
-      var divs = document.getElementsByClassName('h2-div');
-      // Iterate through the numbers array
-      sem.forEach(function (number, index) {
-        let romanSem = convertToRoman(number);
-        // Create a new <h2> element
-        var h2 = document.createElement('h2');
-        h2.textContent = 'Semester ' + romanSem;
-        // Append <h2> to the corresponding div with class "h2-div"
-        if (index < divs.length) {
-          divs[index].appendChild(h2);
-        } else {
-          // Handle case where there are more numbers than divs
-          console.error(
-            "Not enough div elements with class 'h2div' for each number."
-          );
-        }
-      });
-
-      if (window.innerWidth <= 750) {
-        alert('Please turn on desktop mode to view content properly');
-      }
-
-      // Print Marksheet
-      document
-        .getElementById('printButton')
-        .addEventListener('click', function () {
-          window.print();
-        });
-
-      // Go To History Page
-      function goToHistoryPage(targetUrl) {
-        let visitedPages =
-          JSON.parse(sessionStorage.getItem('visitedPages')) || [];
-
-        // Convert all stored URLs to relative paths for comparison
-        let normalizedHistory = visitedPages.map(
-          (url) => new URL(url, window.location.origin).pathname
-        );
-
-        // Convert targetUrl to absolute if needed
-        let normalizedTarget = new URL(targetUrl, window.location.origin)
-          .pathname;
-
-        if (normalizedHistory.includes(normalizedTarget)) {
-          window.location.href = normalizedTarget; // Navigate instantly if in history
-        } else {
-          window.location.href = targetUrl; // If not in history, still navigate
-        }
-      }
-
-      // Download Transcript
-      function downloadTranscript() {
-        const btn = document.getElementById('downloadBtn');
-        const rollno = '<%= studentDetails.rollno %>';
-        const url = `/student/transcript/${rollno}`;
-
-        btn.disabled = true;
-        window.location.href = url;
-      }
-    </script>
   </body>
 </html>

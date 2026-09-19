@@ -26,7 +26,7 @@ CREATE TABLE students (
 
 CREATE TABLE users (	
     username VARCHAR(50) NOT NULL PRIMARY KEY,
-    password VARCHAR(50) NOT NULL,
+    password VARCHAR(255) NOT NULL,
     FOREIGN KEY (username) REFERENCES students(rollno) ON DELETE CASCADE
 );
 

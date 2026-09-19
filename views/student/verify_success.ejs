@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Document Verification</title>
+    <link href="/public/css/tailwind.css" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="/public/css-fontawesome/all.min.css" />
+  </head>
+  <body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+    <div
+      class="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden relative"
+    >
+      <div class="h-2 bg-green-500 w-full absolute top-0"></div>
+
+      <div class="p-8 text-center">
+        <div
+          class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6"
+        >
+          <svg
+            class="w-16 h-16 text-green-500 mx-auto"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+            ></path>
+          </svg>
+        </div>
+
+        <h1 class="text-2xl font-bold text-gray-800 mb-1">
+          Verified Authentic
+        </h1>
+        <p class="text-gray-500 text-sm mb-6">
+          The digital signature on this document is valid.
+        </p>
+
+        <div
+          class="bg-gray-50 rounded-xl p-5 text-left border border-gray-200 shadow-inner space-y-3"
+        >
+          <div class="flex justify-between border-b border-gray-200 pb-2">
+            <span class="text-gray-500 text-xs uppercase font-bold"
+              >Student Name</span
+            >
+            <span class="font-semibold text-gray-800"><%= data.name %></span>
+          </div>
+          <div class="flex justify-between border-b border-gray-200 pb-2">
+            <span class="text-gray-500 text-xs uppercase font-bold"
+              >Roll Number</span
+            >
+            <span class="font-mono font-semibold text-gray-800"
+              ><%= data.rollno %></span
+            >
+          </div>
+          <div class="flex justify-between border-b border-gray-200 pb-2">
+            <span class="text-gray-500 text-xs uppercase font-bold"
+              >Department</span
+            >
+            <span class="font-semibold text-gray-800 text-right text-sm"
+              ><%= data.department %></span
+            >
+          </div>
+          <div class="flex justify-between items-center pt-1">
+            <span class="text-gray-500 text-xs uppercase font-bold"
+              >Overall CGPA</span
+            >
+            <span
+              class="bg-green-100 text-green-800 px-3 py-1 rounded-full font-bold text-sm"
+              ><%= data.gpa %></span
+            >
+          </div>
+        </div>
+
+        <div class="mt-6 text-center">
+          <p class="text-xs text-gray-400 uppercase tracking-wider mb-1">
+            Issued By
+          </p>
+          <p class="font-serif text-gray-700 font-bold">University of Jammu</p>
+          <p class="text-[10px] text-gray-400 mt-4 font-mono">
+            ID: <%= token.substring(0, 20) %>...
+          </p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

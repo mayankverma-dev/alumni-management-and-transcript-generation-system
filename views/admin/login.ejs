@@ -2,108 +2,118 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Admin Login</title>
+    <title>Admin Portal Login</title>
     <link rel="stylesheet" href="/public/css/tailwind.css" />
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
     <link rel="stylesheet" href="/public/css-fontawesome/all.min.css" />
     <script src="/public/js/loadHeaderFooter.js"></script>
-    <script src="https://www.google.com/recaptcha/api.js"></script>
   </head>
-  <body class="bg-gray-100 font-sans">
-    <!-- Main Content -->
-    <div id="content">
-      <div id="header" class="min-h-36"></div>
+  <body
+    class="bg-slate-900 font-sans min-h-screen flex flex-col justify-center items-center"
+  >
+    <div class="w-full max-w-md p-8">
+      <div class="text-center mb-8">
+        <img
+          src="/public/images/JU_Logo.webp"
+          alt="Logo"
+          class="h-20 mx-auto mb-4 drop-shadow-lg grayscale brightness-200"
+        />
+        <h1 class="text-3xl font-bold text-white tracking-wider uppercase">
+          Admin Portal
+        </h1>
+        <p class="text-slate-400 text-sm mt-1">University of Jammu</p>
+      </div>
 
-      <div class="flex justify-center items-center mt-4">
-        <form
-          action="/admin/login"
-          method="POST"
-          class="bg-white p-6 pb-10 rounded-lg shadow-md w-full max-w-sm"
-        >
-          <h2 class="text-2xl font-semibold text-gray-800 mb-5">Admin Login</h2>
-
+      <div
+        class="bg-slate-800 rounded-2xl shadow-2xl border border-slate-700 overflow-hidden"
+      >
+        <div class="p-8">
           <% if (message) { %>
           <div
-            class="fixed top-10 right-4 bg-red-100 text-red-700 px-4 py-3 rounded shadow-lg flex items-center space-x-3"
-            id="popup-alert"
+            class="bg-red-500/10 border border-red-500/50 text-red-400 p-3 rounded-lg mb-6 flex items-center text-sm"
           >
-            <i class="fa-regular fa-circle-xmark"></i>
-            <span><%= message %></span>
-            <button
-              class="ml-4 text-red-700 font-bold hover:underline"
-              onclick="document.getElementById('popup-alert').remove()"
-            >
-              Close
-            </button>
+            <i class="fa-solid fa-triangle-exclamation mr-2"></i> <%= message %>
           </div>
           <% } %>
 
-          <div>
-            <label for="username" class="block font-medium text-gray-700 mb-1"
-              >Username:</label
-            >
-            <input
-              type="text"
-              id="username"
-              name="username"
-              required
-              class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-blue-500 mb-4"
-            />
-          </div>
-
-          <div class="mb-4">
-            <label for="password" class="block font-medium text-gray-700 mb-1"
-              >Password:</label
-            >
-            <div class="relative">
-              <div>
+          <form action="/admin/login" method="POST" class="space-y-6">
+            <div>
+              <label
+                class="block text-xs font-bold text-slate-400 uppercase mb-2"
+                >Username</label
+              >
+              <div class="relative">
+                <span
+                  class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-500"
+                  ><i class="fa-solid fa-user-shield"></i
+                ></span>
                 <input
-                  type="password"
-                  id="password"
-                  name="password"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-blue-500"
+                  type="text"
+                  name="username"
                   required
+                  class="w-full bg-slate-900 border border-slate-600 rounded-lg py-2.5 pl-10 pr-4 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
+                  placeholder="Admin ID"
                 />
-                <i
-                  id="togglePassword"
-                  class="fa fa-eye absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-500 cursor-pointer"
-                  onclick="togglePassword()"
-                ></i>
               </div>
             </div>
-          </div>
 
-          <!-- <div class="h-78 flex justify-center items-center mb-6">
-            <div
-              id="recaptcha"
-              class="g-recaptcha"
-              data-sitekey="6Le_hiAqAAAAAOa3_BU3SnZ-Jti9k_4SrhTO_k-E"
-            ></div>
-          </div> -->
+            <div>
+              <label
+                class="block text-xs font-bold text-slate-400 uppercase mb-2"
+                >Password</label
+              >
+              <div class="relative">
+                <span
+                  class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-500"
+                  ><i class="fa-solid fa-lock"></i
+                ></span>
+                <input
+                  type="password"
+                  name="password"
+                  id="password"
+                  required
+                  class="w-full bg-slate-900 border border-slate-600 rounded-lg py-2.5 pl-10 pr-10 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
+                  placeholder="••••••••"
+                />
+                <span
+                  class="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer text-slate-500 hover:text-indigo-400"
+                  onclick="togglePassword()"
+                >
+                  <i id="toggleIcon" class="fa-solid fa-eye"></i>
+                </span>
+              </div>
+            </div>
 
-          <div class="mb-4 mt-14">
             <button
               type="submit"
-              class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 flex justify-center items-center font-medium focus:ring focus:ring-blue-500"
+              class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-lg shadow-lg shadow-indigo-500/30 transition-all duration-200 transform hover:-translate-y-0.5"
             >
-              <i class="fa-solid fa-arrow-right-to-bracket mr-2"></i>Login
+              Secure Login <i class="fa-solid fa-arrow-right ml-2"></i>
             </button>
-          </div>
-        </form>
+          </form>
+        </div>
+        <div
+          class="bg-slate-900/50 px-8 py-4 border-t border-slate-700 text-center"
+        >
+          <a href="/" class="text-slate-500 text-sm hover:text-white transition"
+            ><i class="fa-solid fa-house mr-1"></i> Back to Home</a
+          >
+        </div>
       </div>
     </div>
-    <script>
-      // TOGGLE PASSWORD VISIBILITY
-      function togglePassword() {
-        let passwordField = document.getElementById('password');
-        let toggleIcon = document.getElementById('togglePassword');
 
-        if (passwordField.type === 'password') {
-          passwordField.type = 'text';
-          toggleIcon.classList.replace('fa-eye', 'fa-eye-slash');
+    <script>
+      function togglePassword() {
+        const pwd = document.getElementById('password');
+        const icon = document.getElementById('toggleIcon');
+        if (pwd.type === 'password') {
+          pwd.type = 'text';
+          icon.classList.replace('fa-eye', 'fa-eye-slash');
         } else {
-          passwordField.type = 'password';
-          toggleIcon.classList.replace('fa-eye-slash', 'fa-eye');
+          pwd.type = 'password';
+          icon.classList.replace('fa-eye-slash', 'fa-eye');
         }
       }
     </script>

@@ -840,3 +840,484 @@
     </script>
   </body>
 </html>
+<!-- 
+=<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Complete Profile</title>
+=    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="stylesheet" href="/public/css/tailwind.css" />
+    <link rel="stylesheet" href="/public/css-fontawesome/all.min.css" />
+    <script src="/public/js/loadHeaderFooter.js"></script>
+
+    <script type="text/javascript" async defer>
+      var states_arr = [
+        'Andhra Pradesh',
+        'Arunachal Pradesh',
+        'Assam',
+        'Bihar',
+        'Chhattisgarh',
+        'Goa',
+        'Gujarat',
+        'Haryana',
+        'Himachal Pradesh',
+        'Jammu and Kashmir',
+        'Jharkhand',
+        'Karnataka',
+        'Kerala',
+        'Madhya Pradesh',
+        'Maharashtra',
+        'Manipur',
+        'Meghalaya',
+        'Mizoram',
+        'Nagaland',
+        'Odisha',
+        'Punjab',
+        'Rajasthan',
+        'Sikkim',
+        'Tamil Nadu',
+        'Telangana',
+        'Tripura',
+        'Uttar Pradesh',
+        'Uttarakhand',
+        'West Bengal',
+        'Andaman and Nicobar Islands',
+        'Chandigarh',
+        'Dadra and Nagar Haveli and Daman and Diu',
+        'Delhi',
+        'Lakshadweep',
+        'Puducherry',
+      ];
+
+      var district_arr = [
+        '', // Empty for default option
+        'Anantapur|Chittoor|Cuddapah|East Godavari|Guntur|Krishna|Kurnool|Nellore|Prakasam|Srikakulam|Vishakapatnam|Vizianagaram|West Godavari',
+        'Anjaw|Changlang|Dibang Valley|East Kameng|East Siang|Kra Daadi|Kurung Kumey|Lohit|Longding|Lower Dibang Valley|Lower Subansiri|Namsai|Papum Pare|Siang|Tawang|Tirap|Upper Siang|Upper Subansiri|West Kameng|West Siang',
+        'Baksa|Barpeta|Bongaigaon|Cachar|Chirang|Darrang|Dhemaji|Dhubri|Dibrugarh|Dima Hasao|Goalpara|Golaghat|Hailakandi|Jorhat|Kamrup M|Kamrup R|Karbi Anglong|Karimganj|Kokrajhar|Lakhimpur|Marigaon|Nagaon|Nalbari|Sibsagar|Sonitpur|Tinsukia|Udalguri',
+        'Araria|Arwal|Aurangabad|Banka|Begusarai|Bhagalpur|Bhojpur|Buxar|Darbhanga|East Champaran|Gaya|Gopalganj|Jamui|Jehanabad|Kaimur Bhabua|Katihar|Khagaria|Kishanganj|Lakhisarai|Madhepura|Madhubani|Munger|Muzaffarpur|Nalanda|Nawada|Patna|Purnia|Rohtas|Saharsa|Samastipur|Saran|Sheikhpura|Sheohar|Sitamarhi|Siwan|Supaul|Vaishali|West Champaran',
+        'Balod|Baloda Bazar|Balrampur|Bastar|Bemetra|Bijapur|Bilaspur|Dantewada|Dhamtari|Durg|Gariyaband|Janjgir Champa|Jashpur|Kanker|Kawardha|Kondagaon|Korba|Koriya|Mahasamund|Mungeli|Narayanpur|Raigarh|Raipur|Rajnandgaon|Sukma|Surajpur|Surguja',
+        'North Goa|South Goa',
+        'Ahmedabad|Amreli|Anand|Aravalli|Banas Kantha|Bharuch|Bhavnagar|Botad|Chhotaudepur|Dahod|Devbhumi Dwarka|Gandhinagar|Gir Somnath|Jamnagar|Junagadh|Kachchh|Kheda|Mahesana|Mahisagar|Morbi|Narmada|Navsari|Panch Mahals|Patan|Porbandar|Rajkot|Sabar Kantha|Surat|Surendranagar|Tapi|The Dangs|Vadodara|Valsad',
+        'Ambala|Bhiwani|Faridabad|Fatehabad|Gurgaon|Hisar|Jhajjar|Jind|Kaithal|Karnal|Kurukshetra|Mahendragarh|Mewat|Palwal|Panchkula|Panipat|Rewari|Rohtak|Sirsa|Sonipat|Yamunanagar',
+        'Bilaspur|Chamba|Hamirpur|Kangra|Kinnaur|Kullu|Lahul Spiti|Mandi|Shimla|Sirmaur|Solan|Una',
+        'Anantnag|Badgam|Bandipora|Baramula|Doda|Ganderbal|Jammu|Kargil|Kathua|Kishtwar|Kulgam|Kupwara|Leh Ladakh|Poonch|Pulwama|Rajouri|Ramban|Reasi|Samba|Shopian|Srinagar|Udhampur',
+        'Bokaro|Chatra|Deoghar|Dhanbad|Dumka|Garhwa|Giridih|Godda|Gumla|Hazaribagh|Jamtara|Khunti|Kodarma|Latehar|Lohardaga|Pakaur|Palamu|Pashchimi Singhbhum|Purbi Singhbhum|Ramgarh|Ranchi|Sahibganj|Saraikela|Simdega',
+        'Bagalkote|Bangalore Rural|Bangalore Urban|Belgaum|Bellary|Bidar|Bijapur|Chamrajnagar|Chikkaballapur|Chikmagalur|Chitradurga|Dakshina Kannada|Davanagere|Dharwad|Gadag|Gulbarga|Hassan|Haveri|Kodagu|Kolar|Koppal|Mandya|Mysore|Raichur|Ramanagar|Shimoga|Tumkur|Udupi|Uttara Kannada|Yadgir',
+        'Alappuzha|Ernakulam|Idukki|Kannur|Kasaragod|Kollam|Kottayam|KOZHIKKODE|Malappuram|Palakkad|Pathanamthitta|Thiruvananthapuram|Thrissur|Wayanad',
+        'Agar Malwa|Alirajpur|Anuppur|Ashok Nagar|Balaghat|Barwani|Betul|Bhind|Bhopal|Burhanpur|Chhatarpur|Chhindwada|Damoh|Datia|Dewas|Dhar|Dindori|Guna|Gwalior|Harda|Hoshangabad|Indore|Jabalpur|Jhabua|Katni|Khandwa|Khargone|Mandla|Mandsaur|Morena|Narsinghpur|Neemuch|Panna|Raisen|Rajgarh|Ratlam|Rewa|Sagar|Satna|Sehore|Seoni|Shahdol|Shajapur|Sheopur|Shivpuri|Sidhi|Singroli|Tikamgarh|Ujjain|Umaria|Vidisha',
+        'Ahmednagar|Akola|Amravati|Aurangabad|Bhandara|Bid|Brihan Mumbai|Buldana|Chandrapur|Dhule|Gadchiroli|Gondiya|Hingoli|Jalgaon|Jalna|Kolhapur|Latur|Nagpur|Nanded|Nandurbar|Nashik|Osmanabad|Palghar|Parbhani|Pune|Raigarh|Ratnagiri|Sangli|Satara|Sindhudurg|Solapur|Thane|Wardha|Washim|Yavatmal',
+        'Bishnupur|Chandel|Churachandpur|Imphal East|Imphal West|Senapati|Tamenglong|Thoubal|Ukhrul',
+        'East Garo Hills|East Jaintia Hills|East Khasi Hills|North Garo Hills|Ri Bhoi|South Garo Hills|South West Garo Hills|South West Khasi Hills|West Garo Hills|West Jaintia Hills|West Khasi Hills',
+        'Aizawl East|Aizawl West|Champhai|Kolasib|Lawngtlai|Lunglei|Mamit|Saiha|Serchhip',
+        'Dimapur|Kiphire|Kohima|Longleng|Mokokchung|Mon|Peren|Phek|Tuensang|Wokha|Zunheboto',
+        'Anugul|Balangir|Baleshwar|Bargarh|Baudh|Bhadrak|Cuttack|Deogarh|Dhenkanal|Gajapati|Ganjam|Jagatsinghpur|Jajapur|Jharsuguda|Kalahandi|Kandhamal|Kendrapara|Keonjhar|Khordha|Koraput|Malkangiri|Mayurbhanj|Nabarangpur|Nayagarh|Nuapada|Puri|Rayagada|Sambalpur|Sonapur|Sundargarh',
+        'Amritsar|Barnala|Bathinda|Faridkot|Fatehgarh Sahib|Fazilka|Firozpur|Gurdaspur|Hoshiarpur|Jalandhar|Kapurthala|Ludhiana|Mansa|Moga|Muktsar|Pathankot|Patiala|Rupnagar|Sahibzada Ajit Singh Nagar|Sangrur|Shahid Bhagat Singh Nagar|Taran Taran',
+        'Ajmer|Alwar|Banswara|Baran|Barmer|Bharatpur|Bhilwara|Bikaner|Bundi|Chittorgarh|Churu|Dausa|Dholpur|Dungarpur|Ganganagar|Hanumangarh|Jaipur|Jaisalmer|Jalore|Jhalawar|Jhunjhunu|Jodhpur|Karauli|Kota|Nagaur|Pali|Pratapgarh|Rajsamand|Sawai Madhopur|Sikar|Sirohi|Tonk|Udaipur',
+        'East District|North District|South District|West District',
+        'Ariyalur|Chennai|Coimbatore|Cuddalore|Dharmapuri|Dindigul|Erode|Kanchipuram|Kanyakumari|Karur|Krishnagiri|Madurai|Nagapattinam|Namakkal|Perambalur|Pudukottai|Ramanathapuram|Salem|Sivaganga|Thanjavur|The Nilgiris|Theni|Thiruvallur|Thiruvarur|Thoothukudi|Tiruchirappalli|Tirunelveli|Tiruppur|Tiruvannamalai|Vellore|Villupuram|Virudhunagar',
+        'Adilabad|Bhadradri Kothagudem|Hyderabad|Jagtial|Jangaon|Jayashankar Bhoopalpally|Jogulamba Gadwal|Kamareddy|Karimnagar|Khammam|Kumuram Bheem Asifabad|Mahabubabad|Mahbubnagar|Mancherial|Medak|Medchal Malkajgiri|Nagarkurnool|Nalgonda|Nirmal|Nizamabad|Peddapalli|Rajanna Sircilla|Ranga Reddy|Sangareddy|Siddipet|Suryapet|Vikarabad|Wanaparthy|Warangal (Urban)|Warangal (Rural)|Yadadri Bhuvanagiri',
+        'Dhalai|Gomati|Khowai|North Tripura|Sepahijala|South Tripura|Unakoti|West Tripura',
+        'Agra|Aligarh|Allahabad|Ambedkar Nagar|Auraiya|Azamgarh|Bagpat|Bahraich|Ballia|Balrampur|Banda|Bara Banki|Bareilly|Basti|Bijnor|Budaun|Bulandshahr|Chandauli|Chitrakoot|Deoria|Etah|Etawah|Faizabad|Farrukhabad|Fatehpur|Firozabad|Gautam Buddha Nagar|Ghaziabad|Ghazipur|Gonda|Gorakhpur|Hamirpur|Hardoi|Hathras|Jalaun|Jaunpur|Jhansi|Jyotiba Phule Nagar|Kannauj|Kanpur Dehat|Kanpur Nagar|Kanshiram Nagar|Kaushambi|Kushinagar|Lakhimpur Kheri|Lalitpur|Lucknow|Maharajganj|Mahoba|Mainpuri|Mathura|Mau|Meerut|Mirzapur|Moradabad|Muzaffarnagar|Pilibhit|Pratapgarh|Rae Bareli|Rampur|Saharanpur|Sant Kabir Nagar|Sant Ravi Das Nagar|Shahjahanpur|Shravasti|Siddharthnagar|Sitapur|Sonbhadra|Sultanpur|Unnao|Varanasi',
+        'Almora|Bageshwar|Chamoli|Champawat|Dehradun|Haridwar|Nainital|Pauri Garhwal|Pithoragarh|Rudraprayag|Tehri Garhwal|Udham Singh Nagar|Uttarkashi',
+        'Alipurduar|Bankura|Birbhum|Cooch Behar|Dakshin Dinajpur|Darjeeling|Hooghly|Howrah|Jalpaiguri|Jhargram|Kalimpong|Kolkata|Malda|Murshidabad|Nadia|North 24 Parganas|Paschim Bardhaman|Paschim Medinipur|Purba Bardhaman|Purba Medinipur|Purulia|South 24 Parganas|Uttar Dinajpur',
+        'Nicobar|North and Middle Andaman|South Andaman',
+        'Chandigarh',
+        'Dadra and Nagar Haveli and Daman and Diu',
+        'Delhi',
+        'Lakshadweep',
+        'Puducherry|Karaikal|Mahe|Yanam',
+      ];
+
+      function print_state(state_id) {
+        var option_str = document.getElementById(state_id);
+        option_str.length = 0;
+        option_str.options[0] = new Option('Select State', '');
+        option_str.selectedIndex = 0;
+        for (var i = 0; i < states_arr.length; i++) {
+          option_str.options[option_str.length] = new Option(
+            states_arr[i],
+            states_arr[i]
+          );
+        }
+      }
+
+      function print_district(district_id, district_index) {
+        var option_str = document.getElementById(district_id);
+        option_str.length = 0;
+        option_str.options[0] = new Option('Select District', '');
+        option_str.selectedIndex = 0;
+        var district_arr_list = district_arr[district_index].split('|');
+        for (var i = 0; i < district_arr_list.length; i++) {
+          option_str.options[option_str.length] = new Option(
+            district_arr_list[i],
+            district_arr_list[i]
+          );
+        }
+      }
+
+      function toggleInputs() {
+        var nationality = document.getElementById('nationality').value;
+        var stateDropdown = document.getElementById('state');
+        var districtDropdown = document.getElementById('district');
+        var stateText = document.getElementById('stateText');
+        var districtText = document.getElementById('districtText');
+
+        if (nationality === 'Indian') {
+          stateDropdown.style.visibility = 'visible';
+          districtDropdown.style.visibility = 'visible';
+          stateText.style.visibility = 'hidden';
+          districtText.style.visibility = 'hidden';
+        } else {
+          stateDropdown.style.visibility = 'hidden';
+          districtDropdown.style.visibility = 'hidden';
+          stateText.style.visibility = 'visible';
+          districtText.style.visibility = 'visible';
+        }
+      }
+    </script>
+  </head>
+  <body class="bg-gray-100 font-sans" onload="print_state('state');">
+    <div id="header"></div>
+
+    <main class="container mx-auto px-4 py-8 max-w-4xl">
+      <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+        <div class="bg-gray-800 text-white p-6 text-center">
+          <h1 class="text-2xl font-bold">Complete Student Profile</h1>
+          <p class="text-gray-400 text-sm">
+            Please ensure all details are accurate.
+          </p>
+        </div>
+
+        <form
+          action="/student/register"
+          method="POST"
+          enctype="multipart/form-data"
+          id="registerForm"
+          class="p-8 space-y-6"
+        >
+          <h3 class="text-lg font-bold text-blue-800 border-b pb-2 mb-4">
+            Personal Information
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label class="block text-sm font-medium text-gray-700"
+                >Roll Number</label
+              >
+              <input
+                type="text"
+                name="rollno"
+                value="<%= student.rollno %>"
+                readonly
+                class="w-full bg-gray-100 border border-gray-300 rounded px-3 py-2 cursor-not-allowed"
+              />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700"
+                >Student Name <span class="text-red-500">*</span></label
+              >
+              <input
+                type="text"
+                name="student_name"
+                required
+                class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
+              />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700"
+                >Father's Name <span class="text-red-500">*</span></label
+              >
+              <input
+                type="text"
+                name="father_name"
+                required
+                class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
+              />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700"
+                >Date of Birth</label
+              >
+              <input
+                type="text"
+                name="dob"
+                value="<%= student.dob %>"
+                readonly
+                class="w-full bg-gray-100 border border-gray-300 rounded px-3 py-2 cursor-not-allowed"
+              />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700"
+                >Gender</label
+              >
+              <div class="flex gap-4 mt-2">
+                <label class="inline-flex items-center"
+                  ><input
+                    type="radio"
+                    name="gender"
+                    value="Male"
+                    checked
+                    class="text-blue-600"
+                  />
+                  <span class="ml-2">Male</span></label
+                >
+                <label class="inline-flex items-center"
+                  ><input
+                    type="radio"
+                    name="gender"
+                    value="Female"
+                    class="text-blue-600"
+                  />
+                  <span class="ml-2">Female</span></label
+                >
+                <label class="inline-flex items-center"
+                  ><input
+                    type="radio"
+                    name="gender"
+                    value="Others"
+                    class="text-blue-600"
+                  />
+                  <span class="ml-2">Other</span></label
+                >
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700"
+                >Religion <span class="text-red-500">*</span></label
+              >
+              <select
+                name="religion"
+                required
+                class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="" disabled selected>Select</option>
+                <option value="Hindu">Hindu</option>
+                <option value="Muslim">Muslim</option>
+                <option value="Sikh">Sikh</option>
+                <option value="Christian">Christian</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700"
+                >Category <span class="text-red-500">*</span></label
+              >
+              <select
+                name="category"
+                required
+                class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="GEN">General</option>
+                <option value="SC">SC</option>
+                <option value="ST">ST</option>
+                <option value="OBC">OBC</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700"
+                >Marital Status</label
+              >
+              <div class="flex gap-4 mt-2">
+                <label class="inline-flex items-center"
+                  ><input
+                    type="radio"
+                    name="marital_status"
+                    value="Unmarried"
+                    checked
+                    class="text-blue-600"
+                  />
+                  <span class="ml-2">Unmarried</span></label
+                >
+                <label class="inline-flex items-center"
+                  ><input
+                    type="radio"
+                    name="marital_status"
+                    value="Married"
+                    class="text-blue-600"
+                  />
+                  <span class="ml-2">Married</span></label
+                >
+              </div>
+            </div>
+          </div>
+
+          <h3 class="text-lg font-bold text-blue-800 border-b pb-2 mb-4 mt-6">
+            Contact & Academic Details
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label class="block text-sm font-medium text-gray-700"
+                >Phone Number <span class="text-red-500">*</span></label
+              >
+              <input
+                type="tel"
+                name="phone_no"
+                pattern="[0-9]{10}"
+                required
+                class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
+              />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700"
+                >Email <span class="text-red-500">*</span></label
+              >
+              <input
+                type="email"
+                name="email"
+                required
+                class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
+              />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700"
+                >Department <span class="text-red-500">*</span></label
+              >
+              <select
+                name="department"
+                required
+                class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="Computer Science">Computer Science</option>
+                <option value="Information Technology">
+                  Information Technology
+                </option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700"
+                >Year of Admission <span class="text-red-500">*</span></label
+              >
+              <input
+                type="number"
+                name="year_of_admission"
+                required
+                class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
+              />
+            </div>
+          </div>
+
+          <h3 class="text-lg font-bold text-blue-800 border-b pb-2 mb-4 mt-6">
+            Address Details
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label class="block text-sm font-medium text-gray-700"
+                >State <span class="text-red-500">*</span></label
+              >
+              <select
+                id="state"
+                name="domicile_state"
+                onchange="print_district('district', this.selectedIndex)"
+                class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500"
+              ></select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700"
+                >District <span class="text-red-500">*</span></label
+              >
+              <select
+                id="district"
+                name="district"
+                class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500"
+              ></select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700"
+                >Pin Code <span class="text-red-500">*</span></label
+              >
+              <input
+                type="text"
+                name="pin_code"
+                required
+                class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
+              />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700"
+                >Nationality</label
+              >
+              <select
+                name="nationality"
+                id="nationality"
+                class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="Indian">Indian</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            <div class="md:col-span-2">
+              <label class="block text-sm font-medium text-gray-700"
+                >Permanent Address <span class="text-red-500">*</span></label
+              >
+              <textarea
+                name="permanent_address"
+                rows="2"
+                required
+                class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
+              ></textarea>
+            </div>
+
+            <div class="md:col-span-2">
+              <label class="block text-sm font-medium text-gray-700"
+                >Correspondence Address
+                <span class="text-red-500">*</span></label
+              >
+              <textarea
+                name="correspondence_address"
+                rows="2"
+                required
+                class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
+              ></textarea>
+            </div>
+          </div>
+
+          <div
+            class="bg-gray-50 p-4 rounded border border-dashed border-gray-400 flex flex-col items-center"
+          >
+            <label class="block text-sm font-bold text-gray-700 mb-2"
+              >Profile Picture (50kb - 200kb)
+              <span class="text-red-500">*</span></label
+            >
+            <input
+              type="file"
+              name="profile_pic"
+              id="fileInput"
+              accept="image/*"
+              required
+              class="mb-3"
+            />
+            <img
+              id="imagePreview"
+              src=""
+              alt="Preview"
+              class="hidden w-32 h-32 object-cover rounded-full border-2 border-blue-200 shadow-sm"
+            />
+          </div>
+
+          <button
+            type="submit"
+            class="w-full bg-green-600 text-white font-bold py-3 rounded hover:bg-green-700 transition"
+          >
+            Submit Profile
+          </button>
+        </form>
+      </div>
+    </main>
+  </body>
+</html>
+-->

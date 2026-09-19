@@ -2,258 +2,171 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Student Profile</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
     <link rel="stylesheet" href="/public/css/tailwind.css" />
     <link rel="stylesheet" href="/public/css-fontawesome/all.min.css" />
-    <script src="/public/js/loadHeaderFooter.js" defer></script>
-    <style>
-      @import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wdth,wght@0,75..100,300..800;1,75..100,300..800&display=swap');
-      body {
-        font-family: 'Open Sans', sans-serif;
-        background-color: #f7f7f7;
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-      .container {
-        padding: 20px;
-        margin-bottom: 20px;
-      }
-
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-bottom: 20px;
-        font-size: 16px;
-      }
-      th,
-      td {
-        border: 1px solid #ddd;
-        padding: 12px;
-        text-align: left;
-      }
-      th {
-        background-color: #f1f1f1;
-        width: 30%;
-      }
-      .section-heading {
-        background-color: #e0e0e0;
-        font-weight: bold;
-        padding: 10px;
-        margin-bottom: 10px;
-      }
-      .profile-details {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-        gap: 20px;
-        margin-bottom: 20px;
-      }
-      .profile-details .detail-item {
-        border: 1px solid #ddd;
-        padding: 15px;
-        border-radius: 8px;
-        background-color: #f9f9f9;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        word-wrap: break-word;
-        word-break: break-all;
-        white-space: normal;
-      }
-      .profile-details .detail-item h3 {
-        margin-top: 0;
-        color: #333;
-        font-size: 18px;
-      }
-      .profile-details .detail-item p {
-        margin-bottom: 5px;
-        color: #666;
-      }
-      .back-link {
-        display: block;
-        text-align: center;
-        margin-top: 20px;
-        color: #007bff;
-        text-decoration: none;
-        font-size: 16px;
-      }
-      .back-link:hover {
-        text-decoration: underline;
-      }
-
-      .heading-div {
-        position: relative;
-      }
-
-      .heading-div h1 {
-        margin: 1px;
-        margin-bottom: 14px;
-        font-family: 'Open Sans', sans-serif;
-        color: #333;
-        text-align: center;
-        padding: 30px;
-      }
-
-      .photo-div img {
-        padding: 3px;
-        position: absolute;
-        width: 90px;
-        top: 8px;
-        right: 26px;
-      }
-      @media screen and (max-width: 750px) {
-        .profile-details {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-          gap: 10px;
-          margin-bottom: 20px;
-        }
-
-        .profile-details .detail-item {
-          border: 1px solid #d6d6d6;
-          padding: 7px;
-          padding-left: 15px;
-        }
-
-        .heading-div h1 {
-          padding-left: 16px;
-          text-align: left;
-        }
-      }
-    </style>
+    <script src="/public/js/loadHeaderFooter.js"></script>
   </head>
-  <body class="font-sans">
-    <div id="header" class="min-h-36"></div>
+  <body class="bg-gray-100 font-sans min-h-screen flex flex-col">
+    <div id="header"></div>
 
-    <div class="fixed top-4 right-4">
-      <button
-        onclick="goToHistoryPage('/student/dashboard')"
-        class="flex items-center bg-indigo-700 text-white py-2 px-4 rounded font-bold hover:bg-indigo-800"
-      >
-        <i class="fa-solid fa-arrow-left mr-2"></i>Back
-      </button>
-    </div>
-
-    <div class="heading-div">
-      <h1 class="text-center text-3xl font-semibold capitalize mb-6">
-        Student Profile
-      </h1>
-      <div class="photo-div">
-        <img
-          src="/public/uploads/profile_pics/<%= studentDetails.profile_pic %>"
-          alt=""
-        />
+    <div class="container mx-auto px-4 py-8 max-w-5xl">
+      <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-gray-800">My Profile</h1>
+        <a
+          href="/student/dashboard"
+          class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded font-semibold transition flex items-center gap-2"
+        >
+          <i class="fa-solid fa-arrow-left"></i> Back
+        </a>
       </div>
-    </div>
-    <div class="container">
+
       <% if (!studentDetails) { %>
-      <p>
-        You need to complete your registration. Please
-        <a href="/student/register">click here</a> to register.
-      </p>
+      <div
+        class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4"
+        role="alert"
+      >
+        <p>
+          Profile incomplete.
+          <a href="/student/register" class="font-bold underline"
+            >Click here to complete registration.</a
+          >
+        </p>
+      </div>
       <% } else { %>
 
-      <section class="profile-section">
-        <div class="section-heading">Personal Details</div>
-        <div class="profile-details">
-          <div class="detail-item">
-            <h3>Name</h3>
-            <p><%= studentDetails.student_name %></p>
+      <div class="bg-white rounded-xl shadow-md overflow-hidden">
+        <div
+          class="bg-gradient-to-r from-indigo-900 to-blue-800 p-8 text-white flex flex-col md:flex-row items-center gap-6"
+        >
+          <div class="relative">
+            <img
+              src="/public/uploads/profile_pics/<%= studentDetails.profile_pic %>"
+              alt="Profile Pic"
+              class="w-32 h-32 rounded-full border-4 border-white shadow-lg object-cover bg-white"
+            />
           </div>
-
-          <div class="detail-item">
-            <h3>Roll no.</h3>
-            <p><%= studentDetails.rollno %></p>
-          </div>
-          <div class="detail-item">
-            <h3>Father's Name</h3>
-            <p><%= studentDetails.father_name %></p>
-          </div>
-
-          <div class="detail-item">
-            <h3>Date of Birth</h3>
-            <p><%= studentDetails.dob %></p>
-          </div>
-          <div class="detail-item">
-            <h3>Gender</h3>
-            <p><%= studentDetails.gender %></p>
-          </div>
-          <div class="detail-item">
-            <h3>Admission Category</h3>
-            <p><%= studentDetails.category %></p>
-          </div>
-          <div class="detail-item">
-            <h3>Admission Year</h3>
-            <p><%= studentDetails.year_of_admission %></p>
-          </div>
-          <div class="detail-item">
-            <h3>Department</h3>
-            <p><%= studentDetails.department %></p>
-          </div>
-          <div class="detail-item">
-            <h3>Nationality</h3>
-            <p><%= studentDetails.nationality %></p>
-          </div>
-          <div class="detail-item">
-            <h3>Religion</h3>
-            <p><%= studentDetails.religion %></p>
-          </div>
-          <div class="detail-item">
-            <h3>Phone Number</h3>
-            <p><%= studentDetails.phone_no %></p>
-          </div>
-          <div class="detail-item">
-            <h3>Email</h3>
-            <p><%= studentDetails.email %></p>
+          <div class="text-center md:text-left">
+            <h2 class="text-3xl font-bold capitalize">
+              <%= studentDetails.student_name %>
+            </h2>
+            <p class="text-blue-200 font-mono text-lg mt-1">
+              <%= studentDetails.rollno %> (<%= studentDetails.year_of_admission
+              %>)
+            </p>
+            <span
+              class="inline-block mt-3 bg-blue-700 px-3 py-1 rounded-full text-sm border border-blue-500"
+              ><%= studentDetails.department %></span
+            >
           </div>
         </div>
 
-        <div class="section-heading">Address Details</div>
-        <div class="profile-details">
-          <div class="detail-item">
-            <h3>Permanent Address</h3>
-            <p><%= studentDetails.permanent_address %></p>
+        <div class="p-8">
+          <h3 class="text-lg font-bold text-gray-800 border-b pb-2 mb-4">
+            Personal Details
+          </h3>
+          <div
+            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8"
+          >
+            <div class="bg-gray-50 p-3 rounded border border-gray-200">
+              <span class="block text-xs text-gray-500 uppercase font-semibold"
+                >Father's Name</span
+              >
+              <span class="block text-gray-800 font-medium"
+                ><%= studentDetails.father_name %></span
+              >
+            </div>
+            <div class="bg-gray-50 p-3 rounded border border-gray-200">
+              <span class="block text-xs text-gray-500 uppercase font-semibold"
+                >Date of Birth</span
+              >
+              <span class="block text-gray-800 font-medium"
+                ><%= studentDetails.dob %></span
+              >
+            </div>
+            <div class="bg-gray-50 p-3 rounded border border-gray-200">
+              <span class="block text-xs text-gray-500 uppercase font-semibold"
+                >Gender</span
+              >
+              <span class="block text-gray-800 font-medium"
+                ><%= studentDetails.gender %></span
+              >
+            </div>
+            <div class="bg-gray-50 p-3 rounded border border-gray-200">
+              <span class="block text-xs text-gray-500 uppercase font-semibold"
+                >Category</span
+              >
+              <span class="block text-gray-800 font-medium"
+                ><%= studentDetails.category %></span
+              >
+            </div>
+            <div class="bg-gray-50 p-3 rounded border border-gray-200">
+              <span class="block text-xs text-gray-500 uppercase font-semibold"
+                >Religion</span
+              >
+              <span class="block text-gray-800 font-medium"
+                ><%= studentDetails.religion %></span
+              >
+            </div>
+            <div class="bg-gray-50 p-3 rounded border border-gray-200">
+              <span class="block text-xs text-gray-500 uppercase font-semibold"
+                >Nationality</span
+              >
+              <span class="block text-gray-800 font-medium"
+                ><%= studentDetails.nationality %></span
+              >
+            </div>
           </div>
-          <div class="detail-item">
-            <h3>Domicile State</h3>
-            <p><%= studentDetails.domicile_state %></p>
-          </div>
-          <div class="detail-item">
-            <h3>District</h3>
-            <p><%= studentDetails.district %></p>
-          </div>
-          <div class="detail-item">
-            <h3>Pin Code</h3>
-            <p><%= studentDetails.pin_code %></p>
-          </div>
-          <div class="detail-item">
-            <h3>Correspondence Address</h3>
-            <p><%= studentDetails.correspondence_address %></p>
+
+          <h3 class="text-lg font-bold text-gray-800 border-b pb-2 mb-4">
+            Contact & Address
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-gray-50 p-3 rounded border border-gray-200">
+              <span class="block text-xs text-gray-500 uppercase font-semibold"
+                ><i class="fa-solid fa-phone mr-1"></i> Phone</span
+              >
+              <span class="block text-gray-800 font-medium"
+                ><%= studentDetails.phone_no %></span
+              >
+            </div>
+            <div class="bg-gray-50 p-3 rounded border border-gray-200">
+              <span class="block text-xs text-gray-500 uppercase font-semibold"
+                ><i class="fa-solid fa-envelope mr-1"></i> Email</span
+              >
+              <span class="block text-gray-800 font-medium"
+                ><%= studentDetails.email %></span
+              >
+            </div>
+            <div
+              class="bg-gray-50 p-3 rounded border border-gray-200 md:col-span-2"
+            >
+              <span class="block text-xs text-gray-500 uppercase font-semibold"
+                >Permanent Address</span
+              >
+              <span class="block text-gray-800 font-medium"
+                ><%= studentDetails.permanent_address %>, <%=
+                studentDetails.district %>, <%= studentDetails.domicile_state %>
+                - <%= studentDetails.pin_code %></span
+              >
+            </div>
+            <div
+              class="bg-gray-50 p-3 rounded border border-gray-200 md:col-span-2"
+            >
+              <span class="block text-xs text-gray-500 uppercase font-semibold"
+                >Correspondence Address</span
+              >
+              <span class="block text-gray-800 font-medium"
+                ><%= studentDetails.correspondence_address %></span
+              >
+            </div>
           </div>
         </div>
-      </section>
+      </div>
       <% } %>
     </div>
-    <script>
-      // Go To History Page
-      function goToHistoryPage(targetUrl) {
-        let visitedPages =
-          JSON.parse(sessionStorage.getItem('visitedPages')) || [];
-
-        // Convert all stored URLs to relative paths for comparison
-        let normalizedHistory = visitedPages.map(
-          (url) => new URL(url, window.location.origin).pathname
-        );
-
-        // Convert targetUrl to absolute if needed
-        let normalizedTarget = new URL(targetUrl, window.location.origin)
-          .pathname;
-
-        if (normalizedHistory.includes(normalizedTarget)) {
-          window.location.href = normalizedTarget; // Navigate instantly if in history
-        } else {
-          window.location.href = targetUrl; // If not in history, still navigate
-        }
-      }
-    </script>
   </body>
 </html>

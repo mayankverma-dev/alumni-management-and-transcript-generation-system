@@ -2,56 +2,100 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Admin Dashboard</title>
     <link rel="stylesheet" href="/public/css/tailwind.css" />
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
     <link rel="stylesheet" href="/public/css-fontawesome/all.min.css" />
     <script src="/public/js/loadHeaderFooter.js"></script>
-    <script src="/public/js/storeVIsitedPages.js"></script>
   </head>
-  <body class="bg-white text-gray-900 font-sans">
-    <!-- Main Content -->
-    <div id="content">
-      <div id="header" class="min-h-36"></div>
+  <body class="bg-slate-50 font-sans min-h-screen flex flex-col">
+    <div id="header"></div>
 
-      <div class="container mx-auto p-4">
-        <h1 class="text-center text-3xl font-semibold capitalize mb-6">
-          Admin Dashboard
-        </h1>
-
-        <div class="links flex flex-wrap justify-center gap-8 mt-8">
-          <a
-            href="/admin/students"
-            class="w-180 glass-box p-6 flex flex-col items-center justify-center bg-white bg-opacity-20 backdrop-blur-sm rounded-lg shadow-md text-lg text-center hover:shadow-gray-400"
-          >
-            <i class="fa-solid fa-user-graduate"></i>View Students
-          </a>
-
-          <a
-            href="/admin/view-courses"
-            class="w-180 glass-box p-6 flex flex-col items-center justify-center bg-white bg-opacity-20 backdrop-blur-sm rounded-lg shadow-md text-lg text-center hover:shadow-gray-400"
-          >
-            <i class="fa-solid fa-graduation-cap"></i>View Courses
-          </a>
-
-          <a
-            href="/admin/add-courses"
-            class="w-180 glass-box p-6 flex flex-col items-center justify-center bg-white bg-opacity-20 backdrop-blur-sm rounded-lg shadow-md text-lg text-center hover:shadow-gray-400"
-          >
-            <i class="fa-solid fa-square-plus"></i>Add Courses
-          </a>
+    <div
+      class="bg-slate-900 text-white shadow-md py-3 px-6 flex justify-between items-center sticky top-0 z-30"
+    >
+      <div class="flex items-center gap-3">
+        <div
+          class="w-8 h-8 bg-indigo-500 rounded flex items-center justify-center"
+        >
+          <i class="fa-solid fa-user-shield"></i>
         </div>
+        <span class="font-bold tracking-wide">ADMINISTRATOR</span>
       </div>
-      <div class="absolute top-4 right-4">
-        <div id="logout" class="relative">
-          <a
-            href="/admin/logout"
-            class="flex items-center bg-red-600 text-white py-2 px-4 rounded-md font-bold text-sm transition-all hover:bg-red-700 hover:border border-red-600"
-          >
-            <i class="fa-solid fa-arrow-right-from-bracket mr-2"></i> Logout
-          </a>
-        </div>
-      </div>
+      <a
+        href="/admin/logout"
+        class="bg-red-600 hover:bg-red-700 px-4 py-1.5 rounded text-sm font-bold transition shadow-sm"
+      >
+        <i class="fa-solid fa-power-off mr-2"></i> Logout
+      </a>
     </div>
+
+    <main class="flex-grow container mx-auto px-4 py-10">
+      <h1 class="text-3xl font-bold text-slate-800 mb-8">Dashboard Overview</h1>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <a
+          href="/admin/students"
+          class="group bg-white p-8 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border-l-4 border-indigo-500"
+        >
+          <div class="flex items-center justify-between mb-4">
+            <div
+              class="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center text-2xl group-hover:scale-110 transition"
+            >
+              <i class="fa-solid fa-users"></i>
+            </div>
+            <i
+              class="fa-solid fa-arrow-right text-slate-300 group-hover:text-indigo-500 transition"
+            ></i>
+          </div>
+          <h3 class="text-xl font-bold text-slate-800">Manage Students</h3>
+          <p class="text-slate-500 mt-2">
+            View details, edit profiles, add marks, and manage records.
+          </p>
+        </a>
+
+        <a
+          href="/admin/view-courses"
+          class="group bg-white p-8 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border-l-4 border-emerald-500"
+        >
+          <div class="flex items-center justify-between mb-4">
+            <div
+              class="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-2xl group-hover:scale-110 transition"
+            >
+              <i class="fa-solid fa-book-open"></i>
+            </div>
+            <i
+              class="fa-solid fa-arrow-right text-slate-300 group-hover:text-emerald-500 transition"
+            ></i>
+          </div>
+          <h3 class="text-xl font-bold text-slate-800">View Courses</h3>
+          <p class="text-slate-500 mt-2">
+            Update syllabus, edit credits, and manage subjects.
+          </p>
+        </a>
+
+        <a
+          href="/admin/add-courses"
+          class="group bg-white p-8 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border-l-4 border-amber-500"
+        >
+          <div class="flex items-center justify-between mb-4">
+            <div
+              class="w-14 h-14 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center text-2xl group-hover:scale-110 transition"
+            >
+              <i class="fa-solid fa-folder-plus"></i>
+            </div>
+            <i
+              class="fa-solid fa-arrow-right text-slate-300 group-hover:text-amber-500 transition"
+            ></i>
+          </div>
+          <h3 class="text-xl font-bold text-slate-800">Add Courses</h3>
+          <p class="text-slate-500 mt-2">
+            Register new subjects for upcoming semesters.
+          </p>
+        </a>
+      </div>
+    </main>
   </body>
 </html>

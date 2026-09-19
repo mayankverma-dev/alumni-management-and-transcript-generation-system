@@ -2,192 +2,166 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Add Job Details</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="/public/css/tailwind.css" />
     <link rel="stylesheet" href="/public/css-fontawesome/all.min.css" />
     <script src="/public/js/loadHeaderFooter.js"></script>
   </head>
-  <body class="bg-gray-100 font-sans">
-    <div id="header" class="min-h-36"></div>
+  <body class="bg-gray-100 font-sans min-h-screen flex flex-col">
+    <div id="header"></div>
 
-    <div class="fixed top-4 right-4">
-      <button
-        onclick="goToHistoryPage('/student/dashboard')"
-        class="flex items-center bg-indigo-700 text-white py-2 px-4 rounded font-bold hover:bg-indigo-800"
-      >
-        <i class="fa-solid fa-arrow-left mr-2"></i>Back
-      </button>
-    </div>
-
-    <div
-      class="container bg-white p-6 rounded-lg shadow-md mx-auto max-w-xl mt-5"
-    >
-      <div id="message" class="text-center mb-4">
-        <% if (message) { %>
-        <p class="text-red-500 text-sm"><%= message %></p>
-        <% } %>
-      </div>
-
-      <h1
-        id="add-details-h1"
-        class="text-gray-800 text-2xl font-semibold text-center mb-4"
-      >
-        Add Job Details
-      </h1>
-
-      <div id="add-details-h3" class="text-center mb-6">
-        <% if (student.student_name == null) { %>
-        <h3 class="text-gray-600 font-medium">
-          <b>Roll No.:</b> <%= student.rollno %>
-        </h3>
-        <% } else {%>
-        <h3 class="text-gray-600 font-medium leading-6">
-          <b>Roll No.:</b> <%= student.rollno %> | <b>Name:</b> <%=
-          student.student_name %><br />
-          <b>Department:</b> <%= student.department %> (<%=
-          student.year_of_admission %>)
-        </h3>
-        <% } %>
-      </div>
-
-      <form
-        action="/student/job-details"
-        method="POST"
-        enctype="multipart/form-data"
-        id="formSubmit"
-        class="space-y-4"
-      >
-        <input
-          type="text"
-          id="rollno"
-          name="rollno"
-          required
-          readonly
-          value="<%= student.rollno %>"
-          hidden
-        />
-
-        <div>
-          <label for="company_name" class="block font-semibold text-gray-700">
-            Company Name:<span class="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            name="company_name"
-            required
-            class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-400 focus:outline-none"
-          />
-        </div>
-
-        <div>
-          <label
-            for="address_of_company"
-            class="block font-semibold text-gray-700"
-          >
-            Address of Company:<span class="text-red-500">*</span>
-          </label>
-          <textarea
-            name="address_of_company"
-            required
-            class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-400 focus:outline-none resize-y"
-            rows="3"
-          ></textarea>
-        </div>
-
-        <div id="date-div" class="flex flex-wrap justify-between gap-4">
-          <div class="flex-1 min-w-[45%]">
-            <label
-              for="date_of_joining"
-              class="block font-semibold text-gray-700"
-            >
-              Date of Joining:<span class="text-red-500">*</span>
-            </label>
-            <input
-              type="date"
-              name="date_of_joining"
-              required
-              class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-400 focus:outline-none"
-            />
-          </div>
-
-          <div class="flex-1 min-w-[45%]">
-            <label
-              for="date_of_leaving"
-              class="block font-semibold text-gray-700"
-            >
-              Date of Leaving:
-            </label>
-            <input
-              type="date"
-              name="date_of_leaving"
-              class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-400 focus:outline-none"
-            />
-          </div>
-        </div>
-
-        <div>
-          <label for="offer_letter" class="block font-semibold text-gray-700">
-            Offer Letter:<span class="text-red-500">*</span>
-          </label>
-          <input
-            type="file"
-            name="offer_letter"
-            accept="image/*,.pdf"
-            required
-            class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-400 focus:outline-none"
-          />
-        </div>
-
-        <button
-          type="submit"
-          class="w-full bg-blue-600 text-white py-2 px-4 rounded-md text-sm font-semibold hover:bg-blue-700 focus:outline-none focus:ring focus:ring-blue-300"
+    <main class="flex-grow container mx-auto px-4 py-8 max-w-3xl">
+      <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold text-gray-800">Add Placement Details</h1>
+        <a
+          href="/student/dashboard"
+          class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg font-semibold transition flex items-center gap-2"
         >
-          Add Job Details
-        </button>
-      </form>
-    </div>
+          <i class="fa-solid fa-arrow-left"></i> Back
+        </a>
+      </div>
 
-    <script defer>
-      const form = document.getElementById('formSubmit');
+      <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+        <div
+          class="bg-blue-50 px-6 py-4 border-b border-blue-100 flex flex-wrap gap-4 text-sm text-blue-800"
+        >
+          <span
+            ><i class="fa-solid fa-id-badge mr-1"></i> <%= student.rollno
+            %></span
+          >
+          <% if (student.student_name) { %>
+          <span class="hidden sm:inline">|</span>
+          <span
+            ><i class="fa-solid fa-user mr-1"></i> <%= student.student_name
+            %></span
+          >
+          <span class="hidden sm:inline">|</span>
+          <span
+            ><i class="fa-solid fa-building-columns mr-1"></i> <%=
+            student.department %></span
+          >
+          <% } %>
+        </div>
 
-      form.addEventListener('submit', function (event) {
-        // Prevent the form from submitting by default
-        event.preventDefault();
+        <% if (message) { %>
+        <div
+          class="m-6 bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded shadow-sm"
+        >
+          <p class="font-medium">
+            <i class="fa-solid fa-triangle-exclamation mr-2"></i> <%= message %>
+          </p>
+        </div>
+        <% } %>
 
-        // Ask for confirmation
-        const confirmation = confirm(
-          'Are you sure you want to submit this form?'
-        );
+        <form
+          action="/student/job-details"
+          method="POST"
+          enctype="multipart/form-data"
+          id="formSubmit"
+          class="p-8 space-y-6"
+        >
+          <input type="hidden" name="rollno" value="<%= student.rollno %>" />
 
-        // If user confirms, submit the form
-        if (confirmation) {
-          form.submit(); // This submits the form
-        } else {
-          // Optionally, you can handle if the user cancels the submission
-          console.log('Submission cancelled.');
-        }
-      });
+          <div class="grid grid-cols-1 gap-6">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1"
+                >Company Name <span class="text-red-500">*</span></label
+              >
+              <div class="relative">
+                <span
+                  class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400"
+                  ><i class="fa-solid fa-building"></i
+                ></span>
+                <input
+                  type="text"
+                  name="company_name"
+                  required
+                  class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  placeholder="e.g. Tata Consultancy Services"
+                />
+              </div>
+            </div>
 
-      // Go To History Page
-      function goToHistoryPage(targetUrl) {
-        let visitedPages =
-          JSON.parse(sessionStorage.getItem('visitedPages')) || [];
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1"
+                >Company Address <span class="text-red-500">*</span></label
+              >
+              <textarea
+                name="address_of_company"
+                rows="3"
+                required
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                placeholder="Full address of the company location"
+              ></textarea>
+            </div>
+          </div>
 
-        // Convert all stored URLs to relative paths for comparison
-        let normalizedHistory = visitedPages.map(
-          (url) => new URL(url, window.location.origin).pathname
-        );
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1"
+                >Date of Joining <span class="text-red-500">*</span></label
+              >
+              <input
+                type="date"
+                name="date_of_joining"
+                required
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1"
+                >Date of Leaving (If applicable)</label
+              >
+              <input
+                type="date"
+                name="date_of_leaving"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+              />
+            </div>
+          </div>
 
-        // Convert targetUrl to absolute if needed
-        let normalizedTarget = new URL(targetUrl, window.location.origin)
-          .pathname;
+          <div
+            class="border-2 border-dashed border-blue-200 rounded-lg p-6 bg-blue-50 text-center transition hover:bg-blue-100"
+          >
+            <i
+              class="fa-solid fa-cloud-arrow-up text-4xl text-blue-400 mb-2"
+            ></i>
+            <label class="block text-sm font-bold text-gray-700 mb-2"
+              >Upload Offer Letter <span class="text-red-500">*</span></label
+            >
+            <p class="text-xs text-gray-500 mb-3">
+              Supported formats: PDF, JPG, PNG
+            </p>
+            <input
+              type="file"
+              name="offer_letter"
+              accept="image/*,.pdf"
+              required
+              class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 mx-auto max-w-xs"
+            />
+          </div>
 
-        if (normalizedHistory.includes(normalizedTarget)) {
-          window.location.href = normalizedTarget; // Navigate instantly if in history
-        } else {
-          window.location.href = targetUrl; // If not in history, still navigate
-        }
+          <button
+            type="submit"
+            class="w-full bg-blue-700 text-white font-bold py-3 rounded-lg hover:bg-blue-800 transition shadow-lg flex items-center justify-center gap-2"
+          >
+            <i class="fa-solid fa-paper-plane"></i> Submit Details
+          </button>
+        </form>
+      </div>
+    </main>
+
+    <script>
+      document
+        .getElementById('formSubmit')
+        .addEventListener('submit', function (e) {
+          if (!confirm('Are you sure you want to submit these details?'))
+            e.preventDefault();
+        });
+      function goToHistoryPage(url) {
+        window.location.href = url;
       }
     </script>
   </body>

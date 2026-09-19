@@ -2,169 +2,170 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>View Job Details</title>
+    <title>Placement History</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
     <link rel="stylesheet" href="/public/css/tailwind.css" />
     <link rel="stylesheet" href="/public/css-fontawesome/all.min.css" />
     <script src="/public/js/loadHeaderFooter.js"></script>
   </head>
-  <body class="bg-gray-100 font-sans">
-    <div id="header" class="min-h-36"></div>
+  <body class="bg-gray-100 font-sans min-h-screen flex flex-col">
+    <div id="header"></div>
 
-    <div class="fixed top-4 right-4">
-      <button
-        onclick="goToHistoryPage('/student/dashboard')"
-        class="flex items-center bg-indigo-700 text-white py-2 px-4 rounded font-bold hover:bg-indigo-800"
-      >
-        <i class="fa-solid fa-arrow-left mr-2"></i>Back
-      </button>
-    </div>
-
-    <h2 class="text-2xl font-bold text-center text-gray-800 mt-8 mb-6">
-      Your Job Details
-    </h2>
-
-    <div
-      class="container bg-white p-6 rounded-lg shadow-md mx-auto max-w-3xl mb-6"
-    >
-      <% if (jobDetails.length === 0) { %>
-      <p class="text-center text-gray-500">No job details found.</p>
-      <% } else { %>
-
-      <h3 class="text-center text-gray-600 font-medium text-lg mb-6">
-        Roll No.: <%= jobDetails[0].rollno %> | Name: <%=
-        studentDetails[0].student_name %> | Dept.: <%=
-        studentDetails[0].department %> (<%= studentDetails[0].year_of_admission
-        %>)
-      </h3>
+    <main class="flex-grow container mx-auto px-4 py-8 max-w-5xl">
+      <div class="flex justify-between items-center mb-8">
+        <h1 class="text-2xl md:text-3xl font-bold text-gray-800">
+          Placement History
+        </h1>
+        <a
+          href="/student/dashboard"
+          class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg font-semibold hover:bg-gray-50 transition shadow-sm"
+        >
+          <i class="fa-solid fa-arrow-left mr-2"></i> Back
+        </a>
+      </div>
 
       <% if (message) { %>
       <div
-        class="fixed top-10 right-4 bg-red-100 text-red-700 px-4 py-3 rounded shadow-lg flex items-center space-x-3"
         id="popup-alert"
+        class="fixed top-24 right-5 bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 rounded shadow-lg z-50 flex items-center gap-3"
       >
-        <span><%= message %></span>
+        <i class="fa-solid fa-circle-info"></i> <span><%= message %></span>
         <button
-          class="ml-4 text-red-700 font-bold hover:underline"
-          onclick="document.getElementById('popup-alert').remove()"
+          onclick="this.parentElement.remove()"
+          class="ml-auto text-blue-800"
         >
-          Close
+          <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
-      <% } %> <% jobDetails.forEach((job) => { %>
+      <% } %> <% if (jobDetails.length === 0) { %>
       <div
-        class="job-details bg-gray-50 p-4 mb-6 rounded-lg border-2 border-gray-300"
+        class="bg-white rounded-xl shadow-sm p-12 text-center border border-gray-200"
       >
-        <div class="job-column flex flex-wrap gap-6">
-          <div class="flex-1">
-            <p class="text-gray-700 font-bold">
-              Company Name:
-              <span class="font-normal"><%= job.company_name %></span>
-            </p>
-            <p class="text-gray-700 font-bold">
-              Date of Joining:
-              <span class="font-normal">
-                <%= new Intl.DateTimeFormat('en-US', { year: 'numeric', month:
-                'short', day: 'numeric' }).format(new
-                Date(job.date_of_joining)); %></span
-              >
-            </p>
-            <p class="text-gray-700 font-bold">
-              Date of Leaving:
-              <span class="font-normal"
-                ><%= job.date_of_leaving ? new Intl.DateTimeFormat('en-US', {
-                year: 'numeric', month: 'short', day: 'numeric' }) .format(new
-                Date(job.date_of_leaving)) : 'N/A'; %></span
-              >
-            </p>
+        <div
+          class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl text-gray-400"
+        >
+          <i class="fa-solid fa-folder-open"></i>
+        </div>
+        <h3 class="text-xl font-bold text-gray-700 mb-2">No Records Found</h3>
+        <p class="text-gray-500 mb-6">
+          You haven't added any placement details yet.
+        </p>
+        <a
+          href="/student/job-details"
+          class="bg-blue-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-700 transition"
+          >Add Placement</a
+        >
+      </div>
+      <% } else { %>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <% jobDetails.forEach((job) => { %>
+        <div
+          class="bg-white rounded-xl shadow-md hover:shadow-lg transition border border-gray-200 overflow-hidden flex flex-col h-full"
+        >
+          <div
+            class="bg-gray-50 px-6 py-4 border-b border-gray-100 flex justify-between items-center"
+          >
+            <h3 class="text-lg font-bold text-gray-800 truncate">
+              <i class="fa-solid fa-briefcase text-blue-500 mr-2"></i><%=
+              job.company_name %>
+            </h3>
+            <% if (!job.date_of_leaving) { %>
+            <span
+              class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded font-bold uppercase animate-pulse"
+              >Current</span
+            >
+            <% } else { %> <% } %>
           </div>
-          <div class="flex-1">
-            <p class="text-gray-700 font-bold">
-              Address of Company:
-              <span class="font-normal"><%= job.address_of_company %></span>
+
+          <div class="p-6 flex-grow space-y-3 text-sm text-gray-600">
+            <p>
+              <i
+                class="fa-solid fa-location-dot w-5 text-center mr-1 text-gray-400"
+              ></i>
+              <%= job.address_of_company %>
             </p>
-            <p class="text-gray-700 font-bold">
-              Offer Letter:
-              <a
-                href="/public/uploads/offer_letters/<%= job.offer_letter %>"
-                class="text-blue-600 hover:underline"
-                target="_blank"
-                >View Offer Letter</a
+
+            <div class="flex items-center gap-2">
+              <i
+                class="fa-regular fa-calendar w-5 text-center mr-1 text-gray-400"
+              ></i>
+              <span
+                >Joined:
+                <span class="font-semibold text-gray-800"
+                  ><%= new Date(job.date_of_joining).toLocaleDateString()
+                  %></span
+                ></span
               >
-            </p>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <i
+                class="fa-solid fa-right-from-bracket w-5 text-center mr-1 text-gray-400"
+              ></i>
+              <span
+                >Left: <% if (job.date_of_leaving) { %>
+                <span class="font-semibold text-gray-800"
+                  ><%= new Date(job.date_of_leaving).toLocaleDateString()
+                  %></span
+                >
+                <% } else { %>
+                <span class="italic text-gray-400">Present</span>
+                <% } %>
+              </span>
+            </div>
+          </div>
+
+          <div class="px-6 py-4 bg-gray-50 border-t border-gray-100 space-y-4">
+            <a
+              href="/public/uploads/offer_letters/<%= job.offer_letter %>"
+              target="_blank"
+              class="flex items-center justify-center w-full bg-white border border-blue-200 text-blue-600 py-2 rounded hover:bg-blue-50 transition font-semibold text-sm"
+            >
+              <i class="fa-regular fa-file-pdf mr-2"></i> View Offer Letter
+            </a>
+
+            <% if (!job.date_of_leaving) { %>
+            <form
+              action="/student/update-date-of-leaving"
+              method="POST"
+              class="pt-2 border-t border-gray-200"
+              onsubmit="return confirm('Confirm update date of leaving?')"
+            >
+              <input type="hidden" name="rollno" value="<%= job.rollno %>" />
+              <input
+                type="hidden"
+                name="company_name"
+                value="<%= job.company_name %>"
+              />
+
+              <label
+                class="block text-xs font-bold text-gray-500 uppercase mb-1"
+                >Update Leaving Date</label
+              >
+              <div class="flex gap-2">
+                <input
+                  type="date"
+                  name="date_of_leaving"
+                  required
+                  class="flex-grow px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:border-blue-500"
+                />
+                <button
+                  type="submit"
+                  class="bg-gray-800 text-white px-3 py-1 rounded text-sm hover:bg-gray-900"
+                >
+                  Update
+                </button>
+              </div>
+            </form>
+            <% } %>
           </div>
         </div>
-
-        <% if (!job.date_of_leaving) { %>
-        <form
-          action="/student/update-date-of-leaving"
-          method="POST"
-          id="confirmSubmit"
-          class="mt-4 border-t border-gray-300 pt-4"
-        >
-          <input type="hidden" name="rollno" value="<%= job.rollno %>" />
-          <input
-            type="hidden"
-            name="company_name"
-            value="<%= job.company_name %>"
-          />
-          <label
-            for="date_of_leaving"
-            class="text-gray-900 font-semibold mb-2 mr-4"
-            >Add Date of Leaving:</label
-          >
-          <input
-            type="date"
-            id="date_of_leaving"
-            name="date_of_leaving"
-            required
-            class="p-2 mr-4 border border-gray-400 rounded-md focus:ring focus:ring-blue-500 focus:outline-none"
-          />
-          <button
-            type="submit"
-            class="bg-blue-500 text-white p-2 py-1 rounded-md font-semibold hover:bg-blue-600 focus:outline-none hover:ring hover:ring-blue-300 focus:ring-blue-600"
-          >
-            Submit
-          </button>
-        </form>
-        <% } %>
+        <% }) %>
       </div>
-      <% }) %> <% } %>
-
-      <hr class="my-6 border-gray-300" />
-    </div>
-
-    <script>
-      document
-        .getElementById('confirmSubmit')
-        .addEventListener('submit', function (event) {
-          var userConfirmed = confirm(
-            'Do you really want to Add the date of Leaving?'
-          );
-          if (!userConfirmed) {
-            event.preventDefault();
-          }
-        });
-      // Go To History Page
-      function goToHistoryPage(targetUrl) {
-        let visitedPages =
-          JSON.parse(sessionStorage.getItem('visitedPages')) || [];
-
-        // Convert all stored URLs to relative paths for comparison
-        let normalizedHistory = visitedPages.map(
-          (url) => new URL(url, window.location.origin).pathname
-        );
-
-        // Convert targetUrl to absolute if needed
-        let normalizedTarget = new URL(targetUrl, window.location.origin)
-          .pathname;
-
-        if (normalizedHistory.includes(normalizedTarget)) {
-          window.location.href = normalizedTarget; // Navigate instantly if in history
-        } else {
-          window.location.href = targetUrl; // If not in history, still navigate
-        }
-      }
-    </script>
+      <% } %>
+    </main>
   </body>
 </html>

@@ -2,267 +2,272 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Add Student Marks</title>
+    <title>Add Marks</title>
     <link rel="stylesheet" href="/public/css/tailwind.css" />
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
     <link rel="stylesheet" href="/public/css-fontawesome/all.min.css" />
     <script src="/public/js/loadHeaderFooter.js"></script>
     <style>
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
-      }
-      th,
-      td {
-        border: 1px solid #ddd;
-        padding: 8px;
-        text-align: center;
-        position: relative;
-      }
-      th {
-        background: #f4f4f4;
-        font-weight: 600;
-      }
-      input {
+      /* Clean Input Style for Spreadsheet feel */
+      .sheet-input {
         width: 100%;
         height: 100%;
-        border-bottom: 2px solid transparent;
-        outline: none;
+        border: none;
         background: transparent;
         text-align: center;
-        font-size: 1rem;
+        outline: none;
         padding: 8px;
       }
-      input:focus {
-        background: #f0f8ff;
-        border-bottom: 2px solid #3b82f6;
-        outline: none;
+      .sheet-input:focus {
+        background-color: #eff6ff;
+        box-shadow: inset 0 0 0 2px #3b82f6;
       }
-      select {
-        width: 200px;
-        padding: 6px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        outline: none;
-        font-size: 1rem;
-      }
-
-      /* Hide the default number input arrow */
-      input[type='number']::-webkit-outer-spin-button,
-      input[type='number']::-webkit-inner-spin-button {
+      /* Chrome Spin Button Hide */
+      input::-webkit-outer-spin-button,
+      input::-webkit-inner-spin-button {
         -webkit-appearance: none;
         margin: 0;
       }
     </style>
   </head>
-  <body>
-    <div id="header" class="min-h-36"></div>
+  <body class="bg-slate-100 font-sans min-h-screen">
+    <div id="header"></div>
 
-    <div class="fixed top-4 right-4">
-      <button
-        onclick="window.history.back()"
-        class="flex items-center bg-indigo-700 text-white py-2 px-4 rounded font-bold hover:bg-indigo-800"
-      >
-        <i class="fa-solid fa-arrow-left mr-2"></i>Back
-      </button>
-    </div>
-
-    <div class="max-w-5xl mx-auto p-6 pb-0">
-      <h1 class="text-2xl font-bold text-gray-800 text-center">
-        Add Marks for Semester: <%= semester %>
-      </h1>
-      <p
-        class="mt-4 text-center font-medium text-lg underline underline-offset-2"
-      >
-        Student Name: <%= student_name %> | Roll Number: <%= rollno %>
-      </p>
-    </div>
-    <form
-      action="/admin/add-marks"
-      method="POST"
-      id="markForm"
-      class="max-w-6xl mx-auto p-6"
-    >
-      <% if (courses.length === 0){ %>
-
-      <p class="text-center text-lg font-semibold text-gray-600 mt-6">
-        No Course Found for Semester: <%= semester %>
-      </p>
-
-      <% } else { %>
-      <!-- Hidden Fields -->
-      <input type="hidden" name="rollno" value="<%= rollno %>" />
-      <input type="hidden" name="semester" value="<%= semester %>" />
-
-      <!-- Session Selection -->
-      <div class="mb-4 text-center">
-        <label class="text-gray-800 text-lg font-medium mr-4"
-          >Select Session</label
-        >
-        <select name="session" required>
-          <option value="">Select Session</option>
-          <% for (let year = student_admission_year; year <= new
-          Date().getFullYear(); year++) { %>
-          <option value="<%= year %>-<%= year+1 %>">
-            <%= year %>-<%= year+1 %>
-          </option>
-          <% } %>
-        </select>
-      </div>
-
-      <div class="overflow-x-auto">
-        <table class="w-full border border-gray-300 shadow-sm text-sm">
-          <thead>
-            <tr>
-              <th>Course Code</th>
-              <th>Course Name</th>
-              <th>Min Marks</th>
-              <th>Max Marks</th>
-              <th>Credits</th>
-              <th>Marks Obtained</th>
-              <th>Marks Internal</th>
-              <th>Grade</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% courses.forEach(course => { %>
-            <input
-              type="hidden"
-              name="marks[<%= course.course_code %>][course_code]"
-              value="<%= course.course_code %>"
-            />
-            <input
-              type="hidden"
-              name="marks[<%= course.course_code %>][semester]"
-              value="<%= semester %>"
-            />
-            <tr class="even:bg-gray-50">
-              <td>
-                <input type="text" value="<%= course.course_code %>" readonly />
-              </td>
-              <td>
-                <input type="text" value="<%= course.course_name %>" readonly />
-              </td>
-              <td>
-                <input type="number" value="<%= course.min_marks %>" readonly />
-              </td>
-              <td>
-                <input type="number" value="<%= course.max_marks %>" readonly />
-              </td>
-              <td>
-                <input type="number" value="<%= course.credits %>" readonly />
-              </td>
-              <td>
-                <input
-                  type="number"
-                  name="marks[<%= course.course_code %>][marks_obtained]"
-                  required
-                />
-              </td>
-              <td>
-                <input
-                  type="number"
-                  name="marks[<%= course.course_code %>][marks_internal]"
-                />
-              </td>
-              <td>
-                <input
-                  type="text"
-                  name="marks[<%= course.course_code %>][grade]"
-                  required
-                />
-              </td>
-            </tr>
-            <% }) %>
-            <!-- <tr>
-              <td colspan="2"></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-            </tr> -->
-
-            <!-- Semester Total -->
-            <tr class="bg-gray-100 font-semibold">
-              <th colspan="2" rowspan="2">SEMESTER TOTAL:</th>
-              <th>Total Min Marks</th>
-              <th>Total Max Marks</th>
-              <th>Total Credits</th>
-              <th colspan="2">Total Obt. (Mks Obt. + Int. Mks)</th>
-
-              <th>SGPA:</th>
-            </tr>
-            <tr>
-              <td>
-                <input
-                  type="number"
-                  name="total_min_marks"
-                  value="<%= total_min_marks %>"
-                  readonly
-                  required
-                />
-              </td>
-              <td>
-                <input
-                  type="number"
-                  name="total_max_marks"
-                  value="<%= total_max_marks %>"
-                  readonly
-                  required
-                />
-              </td>
-              <td>
-                <input
-                  type="number"
-                  name="total_credits"
-                  value="<%= total_credits %>"
-                  step=".01"
-                  readonly
-                  required
-                />
-              </td>
-              <td colspan="2">
-                <input type="number" name="total_marks_obtained" required />
-              </td>
-              <td>
-                <input type="number" name="gpa" step=".01" required />
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Submit Button -->
-      <div class="mt-6 text-center">
+    <main class="container mx-auto px-4 py-8 max-w-7xl">
+      <div class="flex justify-between items-center mb-6">
+        <div>
+          <h1 class="text-2xl font-bold text-slate-800">
+            Enter Semester Marks
+          </h1>
+          <p class="text-slate-500 text-sm mt-1">
+            Student:
+            <span class="font-bold text-slate-700"><%= student_name %></span> |
+            Roll No:
+            <span class="font-mono font-bold text-slate-700"
+              ><%= rollno %></span
+            >
+            | Semester:
+            <span class="font-bold text-slate-700"><%= semester %></span>
+          </p>
+        </div>
         <button
-          type="submit"
-          class="w-32 font-medium bg-blue-600 text-white px-6 py-2 rounded-md shadow-md hover:bg-blue-700 hover:ring hover:ring-blue-800 transition"
+          onclick="window.history.back()"
+          class="bg-white border border-slate-300 px-4 py-2 rounded-lg font-bold hover:bg-slate-50 text-sm shadow-sm"
         >
-          Submit
+          Cancel
         </button>
       </div>
-    </form>
-    <% } %>
-    <script>
-      document
-        .getElementById('markForm')
-        .addEventListener('submit', function (event) {
-          event.preventDefault();
-          if (confirm('Are you sure you want to submit marks?')) {
-            this.submit();
-          }
-        });
 
-      // Automatically move to next input on Enter key press
-      document.addEventListener('keydown', function (event) {
-        if (event.key === 'Enter') {
-          let inputs = [...document.querySelectorAll('input')];
-          let index = inputs.indexOf(document.activeElement);
-          if (index !== -1) {
-            inputs[index + 1]?.focus();
-            event.preventDefault();
-          }
+      <form
+        action="/admin/add-marks"
+        method="POST"
+        id="markForm"
+        class="bg-white rounded-xl shadow-lg overflow-hidden border border-slate-200"
+      >
+        <input type="hidden" name="rollno" value="<%= rollno %>" />
+        <input type="hidden" name="semester" value="<%= semester %>" />
+
+        <div
+          class="bg-slate-50 px-6 py-4 border-b border-slate-200 flex items-center gap-4"
+        >
+          <label class="font-bold text-sm text-slate-600"
+            >Academic Session:</label
+          >
+          <select
+            name="session"
+            required
+            class="border border-slate-300 rounded px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+          >
+            <option value="">Select Year</option>
+            <% for (let year = student_admission_year; year <= new
+            Date().getFullYear(); year++) { %>
+            <option value="<%= year %>-<%= year+1 %>">
+              <%= year %>-<%= year+1 %>
+            </option>
+            <% } %>
+          </select>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full border-collapse">
+            <thead>
+              <tr
+                class="bg-slate-100 text-slate-600 text-xs uppercase font-bold border-b border-slate-300"
+              >
+                <th class="p-3 border-r border-slate-200 text-left w-24">
+                  Code
+                </th>
+                <th class="p-3 border-r border-slate-200 text-left w-64">
+                  Subject Name
+                </th>
+                <th class="p-3 border-r border-slate-200 w-20">Credits</th>
+                <th class="p-3 border-r border-slate-200 w-20">Max</th>
+                <th class="p-3 border-r border-slate-200 w-20">Min</th>
+                <th
+                  class="p-3 border-r border-slate-200 w-28 bg-blue-50 text-blue-700"
+                >
+                  Ext. Marks
+                </th>
+                <th
+                  class="p-3 border-r border-slate-200 w-28 bg-blue-50 text-blue-700"
+                >
+                  Int. Marks
+                </th>
+                <th class="p-3 w-20 bg-blue-50 text-blue-700">Grade</th>
+              </tr>
+            </thead>
+            <tbody class="text-sm text-slate-700 divide-y divide-slate-200">
+              <% if (courses.length === 0) { %>
+              <tr>
+                <td colspan="8" class="text-center py-8 text-red-500">
+                  No courses configured for this semester.
+                </td>
+              </tr>
+              <% } else { %> <% courses.forEach(course => { %>
+              <input
+                type="hidden"
+                name="marks[<%= course.course_code %>][course_code]"
+                value="<%= course.course_code %>"
+              />
+              <input
+                type="hidden"
+                name="marks[<%= course.course_code %>][semester]"
+                value="<%= semester %>"
+              />
+
+              <tr class="hover:bg-slate-50">
+                <td
+                  class="border-r border-slate-200 px-3 py-2 font-mono text-xs"
+                >
+                  <%= course.course_code %>
+                </td>
+                <td class="border-r border-slate-200 px-3 py-2">
+                  <%= course.course_name %>
+                </td>
+                <td class="border-r border-slate-200 px-3 py-2 text-center">
+                  <%= course.credits %>
+                </td>
+                <td
+                  class="border-r border-slate-200 px-3 py-2 text-center text-slate-400"
+                >
+                  <%= course.max_marks %>
+                </td>
+                <td
+                  class="border-r border-slate-200 px-3 py-2 text-center text-slate-400"
+                >
+                  <%= course.min_marks %>
+                </td>
+
+                <td class="border-r border-slate-200 p-0 h-10">
+                  <input
+                    type="number"
+                    name="marks[<%= course.course_code %>][marks_obtained]"
+                    required
+                    class="sheet-input font-bold text-slate-800"
+                    placeholder="-"
+                  />
+                </td>
+                <td class="border-r border-slate-200 p-0 h-10">
+                  <input
+                    type="number"
+                    name="marks[<%= course.course_code %>][marks_internal]"
+                    class="sheet-input"
+                    placeholder="-"
+                  />
+                </td>
+                <td class="p-0 h-10">
+                  <input
+                    type="text"
+                    name="marks[<%= course.course_code %>][grade]"
+                    required
+                    class="sheet-input uppercase"
+                    placeholder="-"
+                  />
+                </td>
+              </tr>
+              <% }) %> <% } %>
+            </tbody>
+
+            <tfoot
+              class="bg-slate-800 text-white font-bold border-t-2 border-slate-900"
+            >
+              <tr>
+                <td
+                  colspan="2"
+                  class="p-3 text-right uppercase text-xs tracking-wider"
+                >
+                  Semester Summary:
+                </td>
+                <td class="p-3 text-center">
+                  <input
+                    type="number"
+                    name="total_credits"
+                    value="<%= total_credits %>"
+                    readonly
+                    class="bg-transparent text-center w-full outline-none"
+                  />
+                </td>
+                <td class="p-3 text-center"><%= total_max_marks %></td>
+                <td class="p-3 text-center"><%= total_min_marks %></td>
+                <input
+                  type="hidden"
+                  name="total_max_marks"
+                  value="<%= total_max_marks %>"
+                />
+                <input
+                  type="hidden"
+                  name="total_min_marks"
+                  value="<%= total_min_marks %>"
+                />
+
+                <td colspan="2" class="p-0 border-l border-slate-700">
+                  <input
+                    type="number"
+                    name="total_marks_obtained"
+                    placeholder="Grand Total"
+                    required
+                    class="w-full h-full bg-slate-700 text-white text-center p-2 outline-none focus:bg-slate-600 placeholder-slate-400"
+                  />
+                </td>
+                <td class="p-0 border-l border-slate-700">
+                  <input
+                    type="number"
+                    step="0.01"
+                    name="gpa"
+                    placeholder="SGPA"
+                    required
+                    class="w-full h-full bg-emerald-600 text-white text-center p-2 outline-none focus:bg-emerald-500 placeholder-emerald-200"
+                  />
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <div class="bg-slate-50 p-4 flex justify-end">
+          <button
+            type="submit"
+            class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2.5 rounded-lg font-bold shadow-lg transition"
+          >
+            <i class="fa-solid fa-save mr-2"></i> Save Results
+          </button>
+        </div>
+      </form>
+    </main>
+
+    <script>
+      // Enter key navigation logic for speed typing
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          const inputs = Array.from(
+            document.querySelectorAll('input:not([type="hidden"])')
+          );
+          const index = inputs.indexOf(document.activeElement);
+          if (index > -1 && index < inputs.length - 1)
+            inputs[index + 1].focus();
         }
       });
     </script>

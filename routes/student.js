@@ -1,447 +1,343 @@
+// routes/student.js
 const express = require('express');
 const router = express.Router();
-const db = require('../db');
+const db = require('../db'); // Use the pool from db.js
 const multer = require('multer');
 const path = require('path');
 const axios = require('axios');
 const PdfPrinter = require('pdfmake');
 const fs = require('fs');
+const bcrypt = require('bcrypt');
+const qrcode = require('qrcode'); // NEW: QR Code Generator
+const jwt = require('jsonwebtoken'); // NEW: For Encryption/Signing
 
-// Multer setup for profile pics
+const promiseDb = db.promise();
+
+// --- Multer Setup ---
 const storageProfilePic = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'public/uploads/profile_pics');
-  },
-  filename: function (req, file, cb) {
-    if (!req.session.student || !req.session.student.rollno) {
+  destination: (req, file, cb) => cb(null, 'public/uploads/profile_pics'),
+  filename: (req, file, cb) => {
+    if (!req.session.student?.rollno)
       return cb(new Error('Session data missing'));
-    }
-    const rollno = req.session.student.rollno;
-    cb(null, 'profile_pic_' + rollno + path.extname(file.originalname));
+    cb(
+      null,
+      `profile_pic_${req.session.student.rollno}${path.extname(
+        file.originalname
+      )}`
+    );
   },
 });
 const uploadProfilePic = multer({ storage: storageProfilePic });
 
-// Multer setup for offer letters
 const storageOfferLetter = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'public/uploads/offer_letters');
-  },
-  filename: function (req, file, cb) {
-    if (!req.session.student || !req.session.student.rollno) {
-      //
-      return cb(new Error('Session data missing')); //
-    }
-    const rollno = req.session.student.rollno; //
-    const companyName = req.body.company_name.replace(/ /g, '_'); //
+  destination: (req, file, cb) => cb(null, 'public/uploads/offer_letters'),
+  filename: (req, file, cb) => {
+    if (!req.session.student?.rollno)
+      return cb(new Error('Session data missing'));
+    const cleanCompanyName = req.body.company_name.replace(
+      /[^a-zA-Z0-9]/g,
+      '_'
+    );
     cb(
       null,
-      'offer_letter_' +
-        rollno +
-        '_' +
-        companyName +
-        path.extname(file.originalname)
-    ); //
+      `offer_letter_${
+        req.session.student.rollno
+      }_${cleanCompanyName}${path.extname(file.originalname)}`
+    );
   },
 });
 const uploadOfferLetter = multer({ storage: storageOfferLetter });
 
-// Student Registration Page for filling rollno. and dob as password
-router.get('/registration', (req, res) => {
-  res.render('student/registration');
+// ==========================================
+// NEW: Public Verification Route
+// This handles the QR code scan
+// ==========================================
+router.get('/verify-document/:token', (req, res) => {
+  const { token } = req.params;
+
+  try {
+    // 1. Verify the Digital Signature using the Secret Key
+    // If the token was tampered with, this will throw an error
+    const decoded = jwt.verify(
+      token,
+      process.env.SESSION_SECRET || 'fallback_secret'
+    );
+
+    // 2. Show Success Page
+    res.render('student/verify_success', { data: decoded, token: token });
+  } catch (err) {
+    // 3. Show Error if Token is fake or expired
+    res.status(400).send(`
+      <div style="text-align:center; padding:50px; font-family:sans-serif; color:red;">
+        <h1>❌ Verification Failed</h1>
+        <p>This QR code is invalid, expired, or has been tampered with.</p>
+      </div>
+    `);
+  }
 });
 
-router.post('/registration', (req, res) => {
-  let rollno = req.body.rollno;
-  let dob = req.body.dob;
-  let captcha = req.body['g-recaptcha-response'];
+// --- Standard Routes ---
 
-  // Check if CAPTCHA is completed
-  if (!captcha) {
+router.get('/registration', (req, res) => res.render('student/registration'));
+
+router.post('/registration', async (req, res) => {
+  let { rollno, dob, 'g-recaptcha-response': captcha } = req.body;
+
+  // Remove CAPTCHA for Development Environment
+  if (process.env.NODE_ENV === 'development') {
+    captcha = 'dummy_captcha';
+  }
+
+  if (!captcha)
     return res.render('student/registration', {
       error: 'Please complete the CAPTCHA.',
     });
-  }
 
-  // Verify reCAPTCHA
-  const secretKey = process.env.RECAPTCHA_SECRET_KEY;
-  const verifyURL = `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${captcha}`;
+  try {
+    const secretKey = process.env.RECAPTCHA_SECRET_KEY;
+    const verifyURL = `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${captcha}`;
+    const captchaResponse = await axios.post(verifyURL);
 
-  axios
-    .post(verifyURL)
-    .then((response) => {
-      if (response.data.success !== true) {
-        return res.render('student/registration', {
-          error: 'Captcha verification failed.',
-        });
-      }
-
-      let checkRollno = 'SELECT * FROM students WHERE rollno = ?';
-      db.query(checkRollno, [rollno], function (error, results) {
-        if (error) {
-          console.log(error);
-          res.status(500).send('Error checking roll number');
-          return;
-        } else if (results.length > 0) {
-          // Student already exists
-          res.render('student/registration', {
-            error: 'exists',
-          });
-        } else {
-          // Roll number does not exist, proceed with registration
-          let insertInStudent =
-            'INSERT INTO students (rollno, dob) VALUES (?, ?)';
-          let insertInUsers =
-            'INSERT INTO users (username, password) VALUES (?, ?)';
-          let studentValues = [rollno, dob];
-          let userValues = [rollno, dob]; // Using dob as the password
-
-          db.query(insertInStudent, studentValues, function (error, result) {
-            if (error) {
-              console.log(error);
-              res.status(500).send('Error inserting into students table');
-              return;
-            }
-
-            db.query(insertInUsers, userValues, function (error, result) {
-              if (error) {
-                console.log(error);
-                res.status(500).send('Error inserting into users table');
-                return;
-              }
-
-              req.session.successMessage =
-                'Registered successfully. Log in with your Date of Birth as password.';
-              res.redirect('/student/login');
-            });
-          });
-        }
+    if (!captchaResponse.data.success && process.env.NODE_ENV !== 'development')
+      return res.render('student/registration', {
+        error: 'Captcha verification failed.',
       });
-    })
-    .catch((error) => {
-      console.error('Error verifying CAPTCHA:', error);
-      res.status(500).send('Captcha verification failed');
-    });
+
+    const [existingStudent] = await promiseDb.query(
+      'SELECT * FROM students WHERE rollno = ?',
+      [rollno]
+    );
+    if (existingStudent.length > 0)
+      return res.render('student/registration', { error: 'exists' });
+
+    const hashedPassword = await bcrypt.hash(dob, 10);
+
+    await promiseDb.query('INSERT INTO students (rollno, dob) VALUES (?, ?)', [
+      rollno,
+      dob,
+    ]);
+    await promiseDb.query(
+      'INSERT INTO users (username, password) VALUES (?, ?)',
+      [rollno, hashedPassword]
+    );
+
+    req.session.successMessage =
+      'Registered successfully. Log in with your Date of Birth as password.';
+    res.redirect('/student/login');
+  } catch (err) {
+    console.error('Registration Error:', err);
+    res.status(500).send('Internal Server Error during registration.');
+  }
 });
-//
 
-// Student Login
 router.get('/login', (req, res) => {
-  const successMessage = req.session.successMessage; // For Password Changes Successfully
-  req.session.successMessage = null; // Clear the message after displaying it once
-
-  const message = req.session.message; // For Wrong Credentials or Wrong Password
-  req.session.message = null; // Clear the message after displaying it once
-
+  const { successMessage, message } = req.session;
+  req.session.successMessage = null;
+  req.session.message = null;
   res.render('student/login', { successMessage, message });
 });
 
-router.post('/login', (req, res) => {
-  const { rollno, password, 'g-recaptcha-response': captcha } = req.body;
+router.post('/login', async (req, res) => {
+  let { rollno, password, 'g-recaptcha-response': captcha } = req.body;
+
+  // Remove CAPTCHA for Development Environment
+  if (process.env.NODE_ENV === 'development') {
+    captcha = 'dummy_captcha';
+  }
 
   if (!captcha) {
     req.session.message = 'Please complete the CAPTCHA.';
     return res.redirect('/student/login');
   }
 
-  // Verify reCAPTCHA
-  const secretKey = process.env.RECAPTCHA_SECRET_KEY;
-  const verifyURL = `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${captcha}`;
+  try {
+    const captchaResponse = await axios.post(
+      `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.RECAPTCHA_SECRET_KEY}&response=${captcha}`
+    );
+    if (
+      !captchaResponse.data.success &&
+      process.env.NODE_ENV !== 'development'
+    ) {
+      req.session.message = 'Captcha verification failed.';
+      return res.redirect('/student/login');
+    }
 
-  axios
-    .post(verifyURL)
-    .then((response) => {
-      if (response.data.success !== true) {
-        req.session.message = 'Captcha verification failed.';
-        return res.redirect('/student/login');
-      }
+    const [users] = await promiseDb.query(
+      'SELECT * FROM users WHERE username = ?',
+      [rollno]
+    );
+    if (users.length === 0) {
+      req.session.message = 'Wrong Credentials or Not Registered.';
+      return res.redirect('/student/login');
+    }
 
-      const query = 'SELECT * FROM users WHERE username = ? AND password = ?';
-      db.query(query, [rollno, password], (err, result) => {
-        if (err) {
-          console.log(err);
-          res.status(500).send('Error inserting into users table');
-          return;
-        }
+    const match = await bcrypt.compare(password, users[0].password);
+    if (!match) {
+      req.session.message = 'Wrong Credentials.';
+      return res.redirect('/student/login');
+    }
 
-        if (result.length === 0) {
-          req.session.message = 'Wrong Credentials or Not Registered.';
-          return res.redirect('/student/login');
-        }
+    const [students] = await promiseDb.query(
+      'SELECT * FROM students WHERE rollno = ?',
+      [rollno]
+    );
+    req.session.student = students[0];
 
-        if (result.length > 0) {
-          const studentQuery = 'SELECT * FROM students WHERE rollno = ?';
-          db.query(studentQuery, [rollno], (err, studentResult) => {
-            if (err) {
-              console.log(err);
-              res
-                .status(500)
-                .send('Error in SELECT * FROM students WHERE rollno = ?');
-              return;
-            }
-
-            req.session.student = studentResult[0]; // Store student data in session
-
-            const dob = req.session.student.dob;
-
-            if (password === dob) {
-              res.redirect('/student/change-password');
-            } else {
-              res.redirect('/student/dashboard');
-            }
-          });
-        } else {
-          res.redirect('/student/login');
-        }
-      });
-    })
-    .catch((error) => {
-      console.error('Error verifying CAPTCHA:', error);
-      res.status(500).send('Captcha verification failed');
-    });
+    if (password === students[0].dob) {
+      res.redirect('/student/change-password');
+    } else {
+      res.redirect('/student/dashboard');
+    }
+  } catch (err) {
+    console.error('Login Error:', err);
+    res.status(500).send('Internal Server Error');
+  }
 });
 
-// Password Change Route if password is DOB //
 router.get('/change-password', (req, res) => {
-  if (!req.session.student) {
-    return res.redirect('/student/login');
-  }
-
-  if (req.session.passwordChanged) {
-    return res.redirect('/student/dashboard'); // Redirect to dashboard if password has already been changed
-  }
-
+  if (!req.session.student) return res.redirect('/student/login');
+  if (req.session.passwordChanged) return res.redirect('/student/dashboard');
   res.render('student/change_password', { student: req.session.student });
 });
 
-router.post('/change-password', (req, res) => {
+router.post('/change-password', async (req, res) => {
   const { dob, rollno, new_password, confirm_password } = req.body;
-
-  if (new_password !== confirm_password) {
+  if (new_password !== confirm_password)
     return res.status(400).send('Passwords do not match');
-  }
 
-  const query = `SELECT * FROM students WHERE rollno = ? AND dob = ?`;
-  db.query(query, [rollno, dob], (err, results) => {
-    if (err) {
-      console.log(err);
-      res
-        .status(500)
-        .send('Error in SELECT * FROM students WHERE rollno = ? AND dob = ?');
-      return;
-    }
-
-    if (results.length > 0) {
-      const updateQuery = `UPDATE users SET password = ? WHERE username = ?`;
-      db.query(updateQuery, [new_password, rollno], (err, result) => {
-        if (err) throw err;
-        req.session.passwordChanged = true; // Set the passwordChanged flag in session
-        req.session.successMessage =
-          'Password changed successfully. Please login again.'; // Store success message in session
-        res.redirect('/student/login'); // Redirect to login page
-      });
+  try {
+    const [students] = await promiseDb.query(
+      'SELECT * FROM students WHERE rollno = ? AND dob = ?',
+      [rollno, dob]
+    );
+    if (students.length > 0) {
+      const hashedPassword = await bcrypt.hash(new_password, 10);
+      await promiseDb.query(
+        'UPDATE users SET password = ? WHERE username = ?',
+        [hashedPassword, rollno]
+      );
+      req.session.passwordChanged = true;
+      req.session.successMessage =
+        'Password changed successfully. Please login again.';
+      res.redirect('/student/login');
     } else {
       res.status(400).send('Invalid credentials');
     }
-  });
+  } catch (err) {
+    res.status(500).send('Error changing password');
+  }
 });
 
-// Password Reset or Forgert Password  //
 router.get('/reset-password', (req, res) => {
   const message = req.session.message;
-  req.session.successMessage = null; // Clear the message after displaying it once
   req.session.message = null;
   res.render('student/reset-password', { message });
 });
 
-// POST route to handle password reset form submission
-router.post('/reset-password', (req, res) => {
+router.post('/reset-password', async (req, res) => {
   const { rollno, student_name, dob, phone_no, email, password } = req.body;
+  try {
+    const verifyQuery = `SELECT * FROM students WHERE rollno = ? AND student_name = ? AND dob = ? AND phone_no = ? AND email = ?`;
+    const [results] = await promiseDb.query(verifyQuery, [
+      rollno,
+      student_name,
+      dob,
+      phone_no,
+      email,
+    ]);
 
-  // Verify user information
-  const verifyQuery = `
-    SELECT * FROM students WHERE rollno = ? AND student_name = ? AND dob = ? AND phone_no = ? AND email = ?
-  `;
-  db.query(
-    verifyQuery,
-    [rollno, student_name, dob, phone_no, email],
-    (err, results) => {
-      if (err) {
-        console.error('Error verifying the information:', err);
-        req.session.message =
-          'An error occurred while verifying the information.';
-        return res.redirect('/student/reset-password');
-      }
-
-      if (results.length === 0) {
-        req.session.message =
-          'Verification failed. Please check your details and try again.';
-        return res.redirect('/student/reset-password');
-      }
-
-      // Update password in the users table
-      const updatePasswordQuery = `
-      UPDATE users
-      SET password = ?
-      WHERE username = ?
-    `;
-      db.query(updatePasswordQuery, [password, rollno], (err, updateResult) => {
-        if (err) {
-          console.error('Error updating password:', err);
-          req.session.message = 'An error occurred while updating password.';
-          return res.redirect('/student/reset-password');
-        }
-
-        if (updateResult.affectedRows === 0) {
-          req.session.message = 'User not found or password update failed.';
-          return res.redirect('/student/reset-password');
-        }
-
-        // Password updated successfully, redirect to login page
-        req.session.successMessage = 'Password updated successfully.';
-
-        res.redirect('/student/login');
-      });
+    if (results.length === 0) {
+      req.session.message = 'Verification failed. Please check your details.';
+      return res.redirect('/student/reset-password');
     }
-  );
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await promiseDb.query('UPDATE users SET password = ? WHERE username = ?', [
+      hashedPassword,
+      rollno,
+    ]);
+    req.session.successMessage = 'Password updated successfully.';
+    res.redirect('/student/login');
+  } catch (err) {
+    req.session.message = 'An error occurred.';
+    res.redirect('/student/reset-password');
+  }
 });
 
-//
-
-// Dashboard
-router.get('/dashboard', (req, res) => {
+router.get('/dashboard', async (req, res) => {
   if (!req.session.student) return res.redirect('/student/login');
-  //else
-  const studentRollno = req.session.student.rollno;
+  try {
+    const [results] = await promiseDb.query(
+      'SELECT * FROM students WHERE rollno = ?',
+      [req.session.student.rollno]
+    );
 
-  // Example query to fetch student details from MySQL
-  const query = 'SELECT * FROM students WHERE rollno = ?';
-  db.query(query, [studentRollno], (err, results) => {
-    if (err) {
-      console.error('Error fetching student details:', err);
-      res.status(500).send('Error fetching student details');
-      return;
+    if (results[0].student_name == null) {
+      return res.redirect('/student/register');
     }
 
-    //as we know only one detail in students table i.e. dob
-    if (results[0].student_name === null) {
-      res.render('student/dashboard', { studentDetails: null }); // it will send that studentDetails = null
-    } else {
-      // Render dashboard with student details
-      const studentDetails = results[0]; // Assuming only one student detail is fetched
-      res.render('student/dashboard', { studentDetails });
-    }
-  });
+    res.render('student/dashboard', {
+      studentDetails: results.length ? results[0] : null,
+    });
+  } catch (err) {
+    res.status(500).send('Error fetching details');
+  }
 });
 
-//
-
-//
-
-// Profile Details //
-router.get('/profile', (req, res) => {
+router.get('/profile', async (req, res) => {
   if (!req.session.student) return res.redirect('/student/login');
-  //else
-  const studentRollno = req.session.student.rollno;
-
-  const query = 'SELECT * FROM students WHERE rollno = ?';
-  db.query(query, [studentRollno], (err, results) => {
-    if (err) {
-      console.error('Error fetching student details:', err);
-      res.status(500).send('Error fetching student details');
-      return;
-    }
-
-    // Render Profile with student details
-    const studentDetails = results[0]; // Assuming only one student detail is fetched
-    res.render('student/profile', { studentDetails });
-  });
+  try {
+    const [results] = await promiseDb.query(
+      'SELECT * FROM students WHERE rollno = ?',
+      [req.session.student.rollno]
+    );
+    res.render('student/profile', { studentDetails: results[0] });
+  } catch (err) {
+    res.status(500).send('Error fetching profile');
+  }
 });
 
-// Student Details Register
 router.get('/register', (req, res) => {
   if (!req.session.student) return res.redirect('/student/login');
-  const student = req.session.student;
-  if (student.student_name) {
+  if (req.session.student.student_name)
     return res.redirect('/student/dashboard');
-  }
-  res.render('student/register', { student });
+  res.render('student/register', { student: req.session.student });
 });
 
-router.post('/register', uploadProfilePic.single('profile_pic'), (req, res) => {
-  if (!req.session.student || !req.session.student.rollno) {
-    return res.status(400).send('Session data missing Login and try Again');
+router.post(
+  '/register',
+  uploadProfilePic.single('profile_pic'),
+  async (req, res) => {
+    if (!req.session.student?.rollno)
+      return res.status(400).send('Session expired.');
+    const studentData = {
+      ...req.body,
+      profile_pic: req.file ? req.file.filename : null,
+    };
+    try {
+      await promiseDb.query('UPDATE students SET ? WHERE rollno = ?', [
+        studentData,
+        req.session.student.rollno,
+      ]);
+      res.redirect('/student/dashboard');
+    } catch (err) {
+      res.status(500).send('Error updating profile');
+    }
   }
-  const {
-    student_name,
-    gender,
-    father_name,
-    religion,
-    category,
-    marital_status,
-    department,
-    year_of_admission,
-    phone_no,
-    email,
-    nationality,
-    domicile_state,
-    district,
-    pin_code,
-    permanent_address,
-    correspondence_address,
-  } = req.body;
+);
 
-  const rollno = req.session.student.rollno;
-
-  const student = {
-    student_name,
-    gender,
-    father_name,
-    religion,
-    category,
-    marital_status,
-    department,
-    year_of_admission,
-    phone_no,
-    email,
-    nationality,
-    domicile_state,
-    district,
-    pin_code,
-    permanent_address,
-    correspondence_address,
-    profile_pic: req.file.filename,
-  };
-
-  const sqlStudent = 'UPDATE students SET ? WHERE rollno = ?';
-  const values = [student, rollno];
-  db.query(sqlStudent, values, (err, result) => {
-    if (err) throw err;
-    res.redirect('/student/dashboard');
-  });
-});
-
-//
-
-//
-
-// Add Job Details
 router.get('/job-details', (req, res) => {
   if (!req.session.student) return res.redirect('/student/login');
-  const student = req.session.student;
-
   const message = req.session.message;
-  req.session.message = null; // Clear the message after displaying it once
-
-  res.render('student/job_details', { student, message });
+  req.session.message = null;
+  res.render('student/job_details', { student: req.session.student, message });
 });
 
 router.post(
   '/job-details',
   uploadOfferLetter.single('offer_letter'),
-  (req, res) => {
+  async (req, res) => {
     if (!req.session.student) return res.redirect('/student/login');
-
     const {
       rollno,
       date_of_joining,
@@ -449,145 +345,98 @@ router.post(
       address_of_company,
       date_of_leaving,
     } = req.body;
-    const offer_letter = req.file.filename;
-
-    // Ensure date_of_leaving is greater than date_of_joining
     if (new Date(date_of_leaving) <= new Date(date_of_joining)) {
       req.session.message =
         'Date of leaving must be greater than date of joining.';
-
       return res.redirect('/student/job-details');
     }
-
     const job = {
       rollno,
       date_of_joining,
       company_name,
       address_of_company,
       date_of_leaving,
-      offer_letter,
+      offer_letter: req.file.filename,
     };
-
-    const sql = 'INSERT INTO job_details SET ?';
-    db.query(sql, job, (err, result) => {
-      if (err) throw err;
+    try {
+      await promiseDb.query('INSERT INTO job_details SET ?', job);
       res.redirect('/student/dashboard');
-    });
+    } catch (err) {
+      res.status(500).send('Error saving job details');
+    }
   }
 );
 
-// Route to handle updating the date of leaving in View Job Details
-router.post('/update-date-of-leaving', (req, res) => {
+router.get('/view-jobs', async (req, res) => {
   if (!req.session.student) return res.redirect('/student/login');
+  try {
+    const [studentDetails] = await promiseDb.query(
+      'SELECT * FROM students WHERE rollno = ?',
+      [req.session.student.rollno]
+    );
+    const [jobDetails] = await promiseDb.query(
+      'SELECT * FROM job_details WHERE rollno = ?',
+      [req.session.student.rollno]
+    );
+    const message = req.session.message;
+    req.session.message = null;
+    res.render('student/view-jobs', { studentDetails, jobDetails, message });
+  } catch (err) {
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+router.post('/update-date-of-leaving', async (req, res) => {
+  if (!req.session.student) return res.redirect('/student/login');
+  const { company_name, date_of_leaving } = req.body;
   const rollno = req.session.student.rollno;
-  const company_name = req.body.company_name;
-  const date_of_leaving = req.body.date_of_leaving;
-
-  // Retrieve the current date_of_joining from the database
-  const getDateOfJoiningQuery =
-    'SELECT date_of_joining FROM job_details WHERE rollno = ? AND company_name = ?';
-  db.query(getDateOfJoiningQuery, [rollno, company_name], (err, result) => {
-    if (err) {
-      console.error('Error fetching date of joining:', err);
-      return res
-        .status(500)
-        .send('Error updating date of leaving. Please try again later.');
-    }
-
-    const date_of_joining = result[0].date_of_joining;
-
-    // Ensure date_of_leaving is greater than date_of_joining
-    if (new Date(date_of_leaving) <= new Date(date_of_joining)) {
+  try {
+    const [result] = await promiseDb.query(
+      'SELECT date_of_joining FROM job_details WHERE rollno = ? AND company_name = ?',
+      [rollno, company_name]
+    );
+    if (result.length === 0) return res.status(404).send('Job not found');
+    if (new Date(date_of_leaving) <= new Date(result[0].date_of_joining)) {
       req.session.message =
         'Date of leaving must be greater than date of joining.';
-      return res.status(400).redirect('/student/view-jobs');
+      return res.redirect('/student/view-jobs');
     }
-
-    const sql =
-      'UPDATE job_details SET date_of_leaving = ? WHERE rollno = ? AND company_name = ?';
-    const values = [date_of_leaving, rollno, company_name];
-    db.query(sql, values, (err, result) => {
-      if (err) {
-        console.error('Error updating date of leaving:', err);
-        return res
-          .status(500)
-          .send('Error updating date of leaving. Please try again later.');
-      }
-
-      res.redirect('/student/view-jobs');
-    });
-  });
+    await promiseDb.query(
+      'UPDATE job_details SET date_of_leaving = ? WHERE rollno = ? AND company_name = ?',
+      [date_of_leaving, rollno, company_name]
+    );
+    res.redirect('/student/view-jobs');
+  } catch (err) {
+    res.status(500).send('Error updating job');
+  }
 });
 
-// Example route handler to render view-job-details.ejs
-router.get('/view-jobs', (req, res) => {
-  if (!req.session.student) return res.redirect('/student/login');
-
-  const rollno = req.session.student.rollno;
-  const studentQuery = 'SELECT * FROM students WHERE rollno = ?';
-  db.query(studentQuery, [rollno], (err, resultStudentDetails) => {
-    if (err) {
-      console.error(err);
-      res.status(500).send('Internal Server Error');
-      return;
-    }
-    const studentDetails = resultStudentDetails;
-    const jobQuery = 'SELECT * FROM job_details WHERE rollno = ?';
-    db.query(jobQuery, [rollno], (err, resultJobDetails) => {
-      if (err) {
-        console.error(err);
-        res.status(500).send('Internal Server Error');
-        return;
-      }
-      const jobDetails = resultJobDetails;
-
-      const message = req.session.message;
-      req.session.successMessage = null; // Clear the message after displaying it once
-
-      req.session.message = null;
-      res.render('student/view-jobs', { studentDetails, jobDetails, message });
-    });
-  });
-});
-
-// Logout
 router.get('/logout', (req, res) => {
-  // Destroy the session
-  req.session.destroy((err) => {
-    if (err) {
-      return res.redirect('/student/dashboard'); // If there's an error, redirect to the dashboard
-    }
-
-    // Clear the cookie
+  req.session.destroy(() => {
     res.clearCookie('connect.sid');
-
-    // Redirect to the login page or homepage
     res.redirect('/student/login');
   });
 });
 
-//
-
-//
-
-// View Marks
-router.get('/marks/:rollno', (req, res) => {
+router.get('/marks/:rollno', async (req, res) => {
   if (!req.session.student) return res.redirect('/student/login');
-
   const rollno = req.params.rollno;
-
   const query = `
-  
-  SELECT sm.semester, c.course_code, c.course_name, c.course_type, c.min_marks, c.max_marks, c.credits, sm.marks_obtained, sm.marks_internal, sm.grade, stm.total_min_marks, stm.total_max_marks, stm.total_marks_obtained, stm. total_credits, stm.gpa 
-  FROM student_marks sm 
-  JOIN courses c ON sm.course_code = c.course_code 
-  JOIN student_total_marks stm ON sm.rollno = stm.rollno AND sm.semester = stm.semester 
-  WHERE sm.rollno = ? ORDER BY sm.semester, c.course_code`;
+    SELECT sm.semester, c.course_code, c.course_name, c.course_type, c.min_marks, c.max_marks, c.credits, 
+           sm.marks_obtained, sm.marks_internal, sm.grade, 
+           stm.total_min_marks, stm.total_max_marks, stm.total_marks_obtained, stm.total_credits, stm.gpa 
+    FROM student_marks sm 
+    JOIN courses c ON sm.course_code = c.course_code 
+    JOIN student_total_marks stm ON sm.rollno = stm.rollno AND sm.semester = stm.semester 
+    WHERE sm.rollno = ? ORDER BY sm.semester, c.course_code`;
 
-  db.query(query, [rollno], (err, results) => {
-    if (err) throw err;
+  try {
+    const [results] = await promiseDb.query(query, [rollno]);
+    if (results.length === 0)
+      return res.send(
+        `<script>alert("Marks Not Added!"); window.location.href = "/student/dashboard";</script>`
+      );
 
-    // Group results by semester
     const semesters = {};
     results.forEach((result) => {
       if (!semesters[result.semester]) {
@@ -600,137 +449,121 @@ router.get('/marks/:rollno', (req, res) => {
           gpa: result.gpa,
         };
       }
-      semesters[result.semester].courses.push({
-        course_code: result.course_code,
-        course_name: result.course_name,
-        course_type: result.course_type,
-        min_marks: result.min_marks,
-        max_marks: result.max_marks,
-        credits: result.credits,
-        marks_obtained: result.marks_obtained,
-        marks_internal: result.marks_internal,
-        grade: result.grade,
-      });
+      semesters[result.semester].courses.push(result);
     });
-
-    const semesterNumber = Object.keys(semesters);
-
-    if (
-      typeof semesters === 'object' &&
-      semesters !== null &&
-      Object.keys(semesters).length === 0
-    ) {
-      // semesters is an empty object
-      res.status(404).send(`
-        <script>
-          alert("Marks Not Added!");
-          window.location.href = "/student/dashboard";
-        </script>
-      `);
-      return;
-    }
-    const studentDetails = req.session.student;
 
     res.render('student/student_marks', {
       semesters,
-      sem: semesterNumber,
-      studentDetails,
+      sem: Object.keys(semesters),
+      studentDetails: req.session.student,
     });
-  });
+  } catch (err) {
+    res.status(500).send('Database error');
+  }
 });
 
-//
-
-// Convert image to base64 once when needed
+// --- Transcript Generation with QR Code and Encryption ---
 function getBase64Image(fileName) {
-  const filePath = path.join(__dirname, '../public', fileName); // adjust path if needed
-  const fileExt = path.extname(fileName).substring(1); // e.g. "png", "jpg"
-  const imageBase64 = fs.readFileSync(filePath).toString('base64');
-  return `data:image/${fileExt};base64,${imageBase64}`;
+  try {
+    const filePath = path.join(__dirname, '../public', fileName);
+    const fileExt = path.extname(fileName).substring(1);
+    const imageBase64 = fs.readFileSync(filePath).toString('base64');
+    return `data:image/${fileExt};base64,${imageBase64}`;
+  } catch (e) {
+    return null;
+  }
 }
 
-// Generate Transcript (Beta)
-router.get('/transcript/:rollno', (req, res) => {
+router.get('/transcript/:rollno', async (req, res) => {
   const rollno = req.params.rollno;
 
-  // Get student info
-  db.query(
-    'SELECT * FROM students WHERE rollno = ?',
-    [rollno],
-    (err, studentResults) => {
-      if (err) return res.status(500).send('Database error');
-      if (studentResults.length === 0)
-        return res.status(404).send('Student not found');
-      const student = studentResults[0];
+  try {
+    const [studentResults] = await promiseDb.query(
+      'SELECT * FROM students WHERE rollno = ?',
+      [rollno]
+    );
+    if (studentResults.length === 0)
+      return res.status(404).send('Student not found');
+    const student = studentResults[0];
 
-      // Get semesters
-      db.query(
-        'SELECT DISTINCT semester, session FROM student_marks WHERE rollno = ? ORDER BY semester',
-        [rollno],
-        (err, semesterResults) => {
-          if (err) return res.status(500).send('Database error');
-          if (semesterResults.length === 0)
-            return res.status(404).send('No transcript data found.');
+    const [semesterResults] = await promiseDb.query(
+      'SELECT DISTINCT semester, session FROM student_marks WHERE rollno = ? ORDER BY semester',
+      [rollno]
+    );
 
-          let transcript = [];
-          let completed = 0;
+    if (semesterResults.length === 0)
+      return res.status(404).send('No transcript data found.');
 
-          semesterResults.forEach((sem) => {
-            const semester = sem.semester;
-            const session = sem.session;
+    const transcript = [];
+    let finalCGPA = 0;
+    let totalSemesters = 0;
 
-            db.query(
-              `
-            SELECT sm.course_code, c.course_name, c.course_type, c.max_marks, c.min_marks, 
-                   c.credits, sm.marks_obtained, sm.marks_internal, sm.grade
-            FROM student_marks sm
-            JOIN courses c ON sm.course_code = c.course_code
-            WHERE sm.rollno = ? AND sm.semester = ? AND sm.session = ?
-            `,
-              [rollno, semester, session],
-              (err, courseResults) => {
-                if (err) return res.status(500).send('Database error');
-
-                db.query(
-                  'SELECT * FROM student_total_marks WHERE rollno = ? AND semester = ? AND session = ?',
-                  [rollno, semester, session],
-                  (err, totalResults) => {
-                    if (err) return res.status(500).send('Database error');
-
-                    const total = totalResults[0] || {
-                      total_min_marks: 0,
-                      total_max_marks: 0,
-                      total_marks_obtained: 0,
-                      total_credits: 0,
-                      gpa: 'N/A',
-                    };
-
-                    transcript.push({
-                      semester,
-                      session,
-                      courses: courseResults,
-                      total_min_marks: total.total_min_marks,
-                      total_max_marks: total.total_max_marks,
-                      total_marks_obtained: total.total_marks_obtained,
-                      total_credits: total.total_credits,
-                      gpa: total.gpa,
-                    });
-
-                    completed++;
-                    if (completed === semesterResults.length) {
-                      generatePDF(res, student, transcript);
-                    }
-                  }
-                );
-              }
-            );
-          });
-        }
+    for (const sem of semesterResults) {
+      const { semester, session } = sem;
+      const [courses] = await promiseDb.query(
+        `
+        SELECT sm.course_code, c.course_name, c.course_type, c.max_marks, c.min_marks, 
+               c.credits, sm.marks_obtained, sm.marks_internal, sm.grade
+        FROM student_marks sm
+        JOIN courses c ON sm.course_code = c.course_code
+        WHERE sm.rollno = ? AND sm.semester = ? AND sm.session = ?
+      `,
+        [rollno, semester, session]
       );
+
+      const [totalResults] = await promiseDb.query(
+        'SELECT * FROM student_total_marks WHERE rollno = ? AND semester = ? AND session = ?',
+        [rollno, semester, session]
+      );
+
+      const total = totalResults[0] || {
+        total_min_marks: 0,
+        total_max_marks: 0,
+        total_marks_obtained: 0,
+        total_credits: 0,
+        gpa: 0,
+      };
+
+      if (total.gpa) {
+        finalCGPA += parseFloat(total.gpa);
+        totalSemesters++;
+      }
+
+      transcript.push({ semester, session, courses, ...total });
     }
-  );
+
+    const cgpa =
+      totalSemesters > 0 ? (finalCGPA / totalSemesters).toFixed(2) : 'N/A';
+
+    // --- ENCRYPTION & QR CODE GENERATION ---
+    // 1. Create the payload to sign
+    const payload = {
+      rollno: student.rollno,
+      name: student.student_name,
+      department: student.department,
+      gpa: cgpa, // Verify the CGPA
+      date: new Date().toISOString(),
+    };
+
+    // 2. Sign the token (Validity: Does not expire or long expiry)
+    const secret = process.env.SESSION_SECRET || 'fallback_secret';
+    const token = jwt.sign(payload, secret);
+
+    // 3. Create the Verification URL
+    // NOTE: In production, replace 'req.headers.host' with your actual domain (e.g., university.com)
+    const verificationUrl = `${req.protocol}://${req.headers.host}/student/verify-document/${token}`;
+
+    // 4. Generate QR Code Base64
+    const qrCodeImage = await qrcode.toDataURL(verificationUrl);
+
+    generatePDF(res, student, transcript, qrCodeImage, verificationUrl);
+  } catch (err) {
+    console.error('Transcript Error:', err);
+    res.status(500).send('Database Error during transcript generation');
+  }
 });
-function generatePDF(res, student, transcript) {
+
+function generatePDF(res, student, transcript, qrCodeImage, verificationUrl) {
   try {
     const fonts = {
       Times: {
@@ -740,25 +573,24 @@ function generatePDF(res, student, transcript) {
         bolditalics: 'Times-BoldItalic',
       },
     };
-
     const printer = new PdfPrinter(fonts);
 
     const docDefinition = {
+      // Encrypt the PDF so users cannot modify text
+      permissions: {
+        modifying: false,
+        copying: false,
+        annotating: false,
+        fillingForms: false,
+        contentAccessibility: true,
+        documentAssembly: false,
+      },
+      ownerPassword: 'secure_random_password_' + Math.random(), // Prevent editing
+
       content: [
-        // Header
         {
           columns: [
-            (() => {
-              try {
-                return {
-                  image: getBase64Image('images/JU_Logo.png'),
-                  width: 60,
-                };
-              } catch (e) {
-                console.warn('⚠️ JU Logo missing:', e.message);
-                return { text: 'JU Logo Missing', fontSize: 8, italics: true };
-              }
-            })(),
+            { image: getBase64Image('images/JU_Logo.png') || '', width: 60 },
             {
               stack: [
                 { text: 'University of Jammu, J&K', style: 'header' },
@@ -771,28 +603,18 @@ function generatePDF(res, student, transcript) {
               ],
               alignment: 'center',
             },
-            (() => {
-              if (student.profile_pic) {
-                try {
-                  return {
-                    image: getBase64Image(
+            student.profile_pic
+              ? {
+                  image:
+                    getBase64Image(
                       `uploads/profile_pics/${student.profile_pic}`
-                    ),
-                    width: 60,
-                  };
-                } catch (e) {
-                  console.warn('⚠️ Profile pic invalid:', e.message);
-                  return { text: 'No Photo', fontSize: 8, italics: true };
+                    ) || '',
+                  width: 60,
                 }
-              }
-              return {};
-            })(),
+              : { text: 'No Photo', fontSize: 8, italics: true },
           ],
         },
-
         { text: '\n' },
-
-        // Student Info
         {
           columns: [
             [
@@ -812,9 +634,7 @@ function generatePDF(res, student, transcript) {
             ],
           ],
         },
-        { text: '\n\n' },
-
-        // Transcript
+        { text: '\n' },
         ...transcript.map((sem) => [
           {
             text: `Semester ${sem.semester} - Session: ${sem.session}`,
@@ -838,15 +658,15 @@ function generatePDF(res, student, transcript) {
               ],
               body: [
                 [
-                  { text: 'Course Code', bold: true },
-                  { text: 'Course Title', bold: true },
+                  { text: 'Code', bold: true },
+                  { text: 'Title', bold: true },
                   { text: 'Type', bold: true },
-                  { text: 'Max Marks', bold: true },
-                  { text: 'Min Marks', bold: true },
-                  { text: 'Marks Obt.', bold: true },
-                  { text: 'Internal Obt.', bold: true },
-                  { text: 'Grade', bold: true },
-                  { text: 'Credits', bold: true },
+                  { text: 'Max', bold: true },
+                  { text: 'Min', bold: true },
+                  { text: 'Obt', bold: true },
+                  { text: 'Int', bold: true },
+                  { text: 'Grd', bold: true },
+                  { text: 'Cr', bold: true },
                 ],
                 ...sem.courses.map((c) => [
                   c.course_code,
@@ -860,7 +680,7 @@ function generatePDF(res, student, transcript) {
                   c.credits,
                 ]),
                 [
-                  { text: 'Semester Total:', colSpan: 3, bold: true },
+                  { text: 'Total:', colSpan: 3, bold: true },
                   {},
                   {},
                   sem.total_max_marks,
@@ -891,12 +711,22 @@ function generatePDF(res, student, transcript) {
             margin: [0, 0, 0, 10],
           },
         ]),
-
-        // Footer
+        { text: '\n' },
+        // --- FOOTER WITH QR CODE ---
         {
-          text: "\nThis is a computer-generated transcript, doesn't require signature.",
-          style: 'footer',
-          alignment: 'center',
+          columns: [
+            {
+              text: 'Scan to Verify Authenticity\nThis document is digitally signed.',
+              fontSize: 9,
+              color: 'gray',
+              width: '*',
+            },
+            {
+              image: qrCodeImage,
+              width: 70,
+              alignment: 'right',
+            },
+          ],
         },
         {
           text: `Generated on: ${new Date().toLocaleDateString()}`,
@@ -905,49 +735,34 @@ function generatePDF(res, student, transcript) {
           alignment: 'right',
         },
       ],
-
       styles: {
         header: { fontSize: 16, bold: true },
         subheader: { fontSize: 12, bold: true },
         info: { fontSize: 9, margin: [0, 1, 0, 1] },
         footer: { fontSize: 8, margin: [0, 10, 0, 0] },
       },
-
       defaultStyle: { font: 'Times' },
       pageMargins: [40, 40, 40, 40],
     };
 
     const pdfDoc = printer.createPdfKitDocument(docDefinition);
-
-    // ✅ Handle stream errors so server won't crash
     pdfDoc.on('error', (err) => {
-      console.error('❌ PDF generation failed:', err.message);
-      if (!res.headersSent) {
+      if (!res.headersSent)
         res.status(500).json({ error: 'Failed to generate PDF' });
-      }
     });
-
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader(
       'Content-Disposition',
       `attachment; filename="Transcript_${student.rollno}.pdf"`
     );
-
     pdfDoc.pipe(res);
     pdfDoc.end();
   } catch (err) {
-    console.error('❌ generatePDF error:', err);
-    if (!res.headersSent) {
-      res
-        .status(500)
-        .json({ error: 'Internal Server Error while generating PDF' });
-    }
+    console.error('Generate PDF Error:', err);
+    if (!res.headersSent) res.status(500).send('Error generating PDF');
   }
 }
 
-// For Wrong Routes redirect the user to " / "
-router.use((req, res, next) => {
-  res.redirect('/student/dashboard');
-});
+router.use((req, res) => res.redirect('/student/dashboard'));
 
 module.exports = router;

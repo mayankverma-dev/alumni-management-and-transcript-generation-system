@@ -3,57 +3,103 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Alumni Management & Transcript Generation System</title>
+    <title>Alumni & Transcript Portal | University of Jammu</title>
     <link href="/public/css/tailwind.css" rel="stylesheet" />
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/public/css-fontawesome/all.min.css" />
     <script src="/public/js/loadHeaderFooter.js"></script>
   </head>
-  <body class="font-sans min-h-screen m-0 p-0 box-border">
-    <!-- Main Content -->
-    <div id="content">
-      <div id="header" class="min-h-36"></div>
+  <body class="font-sans bg-gray-50 flex flex-col min-h-screen">
+    <div id="header"></div>
 
-      <!-- Notification Bar -->
-      <div class="notification-bar">
-        <marquee class="bg-blue-800 text-white text-lg p-2">
-          University of Jammu, Jammu Tawi (J&K)-180006 | Department of Computer
-          Science and I.T. | Official Website:
-          <a
-            href="https://www.jammuuniversity.ac.in/"
-            target="_blank"
-            class="text-blue-200 hover:underline"
+    <div class="bg-blue-800 text-white text-sm py-2 shadow-md z-40">
+      <marquee scrollamount="6">
+        Welcome to the Official Alumni Management & Transcript Generation System
+        | University of Jammu |
+        <a
+          href="https://www.jammuuniversity.ac.in/"
+          target="_blank"
+          class="text-yellow-300 hover:underline font-bold"
+          >Visit Official Website</a
+        >
+      </marquee>
+    </div>
+
+    <main
+      class="flex-grow flex items-center justify-center py-12 px-4 bg-[url('/public/images/pattern.png')] bg-repeat"
+    >
+      <div class="max-w-5xl w-full grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div
+          class="group bg-white p-8 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border-t-4 border-green-500"
+        >
+          <div
+            class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-2xl mb-6 mx-auto group-hover:scale-110 transition-transform"
           >
-            jammuuniversity.ac.in
-          </a>
-        </marquee>
-      </div>
-
-      <!-- Main Content -->
-      <div class="main-div flex justify-center items-center mt-20">
-        <div class="container flex flex-col items-center text-center">
-          <div class="buttons flex flex-col gap-4 md:flex-row">
-            <a
-              href="/student/registration"
-              class="w-232 btn bg-blue-600 text-white py-3 px-8 rounded-lg text-lg font-semibold transition-all duration-300 transform hover:bg-blue-700 hover:scale-105"
-            >
-              Student Registration
-            </a>
-            <a
-              href="/student/login"
-              class="w-232 btn bg-blue-600 text-white py-3 px-8 rounded-lg text-lg font-semibold transition-all duration-300 transform hover:bg-blue-700 hover:scale-105"
-            >
-              Student Login
-            </a>
-            <a
-              href="/admin/login"
-              class="w-232 btn bg-blue-600 text-white py-3 px-8 rounded-lg text-lg font-semibold transition-all duration-300 transform hover:bg-blue-700 hover:scale-105"
-            >
-              Admin Login
-            </a>
+            <i class="fa-solid fa-user-plus"></i>
           </div>
+          <h3 class="text-xl font-bold text-center text-gray-800 mb-2">
+            New Student?
+          </h3>
+          <p class="text-gray-500 text-center text-sm mb-6">
+            Create your digital profile to manage academic records.
+          </p>
+          <a
+            href="/student/registration"
+            class="block w-full bg-green-600 text-white text-center py-3 rounded-lg font-semibold hover:bg-green-700 transition"
+            >Register Now</a
+          >
+        </div>
+
+        <div
+          class="group bg-white p-8 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border-t-4 border-blue-600 relative"
+        >
+          <div
+            class="absolute top-0 right-0 bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded-bl-lg"
+          >
+            STUDENT
+          </div>
+          <div
+            class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-2xl mb-6 mx-auto group-hover:scale-110 transition-transform"
+          >
+            <i class="fa-solid fa-user-graduate"></i>
+          </div>
+          <h3 class="text-xl font-bold text-center text-gray-800 mb-2">
+            Student Login
+          </h3>
+          <p class="text-gray-500 text-center text-sm mb-6">
+            Access transcripts, marksheets, and placement data.
+          </p>
+          <a
+            href="/student/login"
+            class="block w-full bg-blue-600 text-white text-center py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
+            >Login</a
+          >
+        </div>
+
+        <div
+          class="group bg-white p-8 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border-t-4 border-gray-800"
+        >
+          <div
+            class="w-16 h-16 bg-gray-100 text-gray-800 rounded-full flex items-center justify-center text-2xl mb-6 mx-auto group-hover:scale-110 transition-transform"
+          >
+            <i class="fa-solid fa-shield-halved"></i>
+          </div>
+          <h3 class="text-xl font-bold text-center text-gray-800 mb-2">
+            Administration
+          </h3>
+          <p class="text-gray-500 text-center text-sm mb-6">
+            Restricted access for department officials.
+          </p>
+          <a
+            href="/admin/login"
+            class="block w-full bg-gray-800 text-white text-center py-3 rounded-lg font-semibold hover:bg-gray-900 transition"
+            >Admin Login</a
+          >
         </div>
       </div>
+    </main>
 
-      <div id="footer"></div>
-    </div>
+    <div id="footer"></div>
   </body>
 </html>

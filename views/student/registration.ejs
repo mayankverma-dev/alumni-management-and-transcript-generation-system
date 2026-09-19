@@ -2,176 +2,124 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Student Registration</title>
     <link rel="stylesheet" href="/public/css/tailwind.css" />
     <link rel="stylesheet" href="/public/css-fontawesome/all.min.css" />
-    <script
-      rel="preload"
-      src="https://www.google.com/recaptcha/api.js"
-      async
-    ></script>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.google.com/recaptcha/api.js" async></script>
     <script src="/public/js/loadHeaderFooter.js"></script>
     <script>
       document.addEventListener('DOMContentLoaded', function () {
-        const input = document.getElementById('rollno');
-        input.addEventListener('input', function () {
-          this.value = this.value.toUpperCase();
-        });
+        document
+          .getElementById('rollno')
+          .addEventListener('input', function () {
+            this.value = this.value.toUpperCase();
+          });
       });
-
-      function conifirmMe(event) {
-        let rollno = document.getElementById('rollno').value;
-        let dob = document.getElementById('dob').value;
-
-        let confirmationMessage =
-          'Please review your details:\n\n' +
-          'Roll Number: ' +
-          rollno +
-          '\n' +
-          'Date of Birth: ' +
-          dob +
-          '\nDo you want to proceed with registration?';
-
-        return confirm(confirmationMessage);
+      function confirmMe(event) {
+        return confirm(
+          'Please confirm your details:\nRoll No: ' +
+            document.getElementById('rollno').value +
+            '\nDOB: ' +
+            document.getElementById('dob').value
+        );
       }
     </script>
   </head>
-  <body class="font-sans bg-gray-100">
-    <!-- Main Content -->
-    <div id="content">
-      <div id="header" class="min-h-36"></div>
+  <body class="bg-gray-100 font-sans min-h-screen flex flex-col">
+    <div id="header"></div>
 
-      <div class="main-div">
-        <div class="flex justify-center mt-4">
-          <form
-            action="/student/registration"
-            method="POST"
-            onsubmit="return conifirmMe(event)"
-            class="h-510 bg-white p-6 pb-10 rounded-lg shadow-md w-full max-w-sm"
+    <main class="flex-grow flex justify-center items-center p-4">
+      <div
+        class="bg-white rounded-xl shadow-lg p-8 w-full max-w-md border-t-4 border-blue-600"
+      >
+        <h2 class="text-2xl font-bold text-gray-800 text-center mb-6">
+          Student Registration
+        </h2>
+
+        <% if (typeof error !== 'undefined') { %>
+        <div
+          class="bg-red-100 border-l-4 border-red-500 text-red-700 p-3 mb-4 rounded flex justify-between"
+        >
+          <span
+            ><%= error === 'exists' ? 'Student already exists.' : error %></span
           >
-            <h2 class="text-2xl font-semibold mb-5 text-gray-800">
-              Student Registration
-            </h2>
+        </div>
+        <% } %>
 
-            <% if (typeof error !== 'undefined' && error === 'exists') { %>
-            <div
-              class="fixed top-12 right-4 bg-red-100 text-red-700 px-4 py-3 rounded shadow-lg flex items-center space-x-3"
-              id="popup-alert"
+        <form
+          action="/student/registration"
+          method="POST"
+          onsubmit="return confirmMe(event)"
+          class="space-y-5"
+        >
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >Roll Number</label
             >
-              <i class="fa-regular fa-circle-xmark"></i>
-              <span>Student with this roll number already exists.</span>
-              <button
-                class="ml-4 text-red-700 font-bold hover:underline"
-                onclick="document.getElementById('popup-alert').remove()"
-              >
-                Close
-              </button>
-            </div>
-            <% } else if (typeof error !== 'undefined' && error !== 'exists') {
-            %>
-            <div
-              class="fixed top-10 right-4 bg-red-100 text-red-700 px-4 py-3 rounded shadow-lg flex items-center space-x-3"
-              id="popup-alert"
+            <input
+              type="text"
+              name="rollno"
+              id="rollno"
+              pattern="\d{3}[A-Z]{3}\d{4}"
+              title="Format: 121CSE2024"
+              required
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+              placeholder="e.g. 101ITE2023"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1"
+              >Date of Birth (DD-MM-YYYY)</label
             >
-              <i class="fa-regular fa-circle-xmark"></i>
-              <span><%= error %></span>
-              <button
-                class="ml-4 text-red-700 font-bold hover:underline"
-                onclick="document.getElementById('popup-alert').remove()"
-              >
-                Close
-              </button>
-            </div>
-            <% } %>
+            <input
+              type="text"
+              name="dob"
+              id="dob"
+              pattern="\d{2}-\d{2}-\d{4}"
+              placeholder="DD-MM-YYYY"
+              required
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+            />
+            <p class="text-xs text-gray-500 mt-1">
+              This will be your initial password.
+            </p>
+          </div>
 
-            <div>
-              <label for="rollno" class="block font-medium text-gray-700 mb-1"
-                >Roll Number:</label
-              >
-              <input
-                type="text"
-                name="rollno"
-                id="rollno"
-                pattern="\d{3}[A-Z]{3}\d{4}"
-                title="Enter correct Roll No. (Eg. 121CSE2024)"
-                required
-                class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-blue-500 mb-4"
-              />
-            </div>
+          <div class="flex justify-center my-4">
+            <div
+              class="g-recaptcha"
+              data-sitekey="6Ld6vGkrAAAAAMMaX4NtFTIDSFi4g2MUtg83lbud"
+            ></div>
+          </div>
 
-            <div>
-              <label for="dob" class="block font-medium text-gray-700 mb-1"
-                >Date of Birth (DD-MM-YYYY):</label
-              >
-              <input
-                type="text"
-                id="dob"
-                name="dob"
-                pattern="\d{2}-\d{2}-\d{4}"
-                placeholder="DD-MM-YYYY"
-                required
-                class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring focus:ring-blue-500 mb-4"
-              />
-            </div>
+          <button
+            type="submit"
+            class="w-full bg-blue-600 text-white font-bold py-2.5 rounded-lg hover:bg-blue-700 transition shadow"
+          >
+            <i class="fa-solid fa-user-plus mr-2"></i> Register
+          </button>
+        </form>
 
-            <div class="mb-4">
-              <a
-                href="/student/reset-password"
-                class="text-blue-600 text-sm hover:underline"
-                >Forget Password?</a
-              >
-            </div>
-
-            <div class="h-78 flex justify-center items-center mb-4">
-              <div
-                id="recaptcha"
-                class="g-recaptcha"
-                data-sitekey="6Ld6vGkrAAAAAMMaX4NtFTIDSFi4g2MUtg83lbud"
-              ></div>
-            </div>
-
-            <div>
-              <button
-                type="submit"
-                class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 flex justify-center items-center font-medium focus:ring focus:ring-blue-500"
-              >
-                <i class="fa-solid fa-user-plus mr-2"></i>Register
-              </button>
-            </div>
-
-            <div class="register-link text-center mt-4">
-              <a
-                href="/student/login"
-                class="text-blue-600 hover:underline font-medium"
-                >Login</a
-              >
-            </div>
-          </form>
+        <div class="mt-4 text-center text-sm">
+          <a
+            href="/student/login"
+            class="text-blue-600 hover:underline font-medium"
+            >Already registered? Login</a
+          >
         </div>
       </div>
-    </div>
-
-    <script async defer>
-      document.addEventListener('DOMContentLoaded', () => {
-        const dobInput = document.getElementById('dob');
-
-        // DOB style in DD-MM-YYYY
-        dobInput.addEventListener('input', function (e) {
-          let value = e.target.value.replace(/[^0-9]/g, ''); // Remove non-numericcharacters
-          if (value.length >= 2 && value.length <= 4) {
-            value = value.slice(0, 2) + '-' + value.slice(2);
-          } else if (value.length > 4) {
-            value =
-              value.slice(0, 2) +
-              '-' +
-              value.slice(2, 4) +
-              '-' +
-              value.slice(4, 8);
-          }
-          e.target.value = value;
-        });
-      });
-    </script>
+    </main>
   </body>
+  <script>
+    // Formatting DOB automatically
+    document.getElementById('dob').addEventListener('input', function (e) {
+      let v = e.target.value.replace(/\D/g, '');
+      if (v.length >= 2) v = v.slice(0, 2) + '-' + v.slice(2);
+      if (v.length >= 5) v = v.slice(0, 5) + '-' + v.slice(5, 9);
+      e.target.value = v;
+    });
+  </script>
 </html>
